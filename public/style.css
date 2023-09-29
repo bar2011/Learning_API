@@ -1,0 +1,27 @@
+.base-div {
+    border-bottom: 3px #696969 solid;
+    width: 100%;
+}
+
+.base-title {
+    width: 15%;
+    height: 3vh;
+    font-size: 25px;
+}
+
+#create-course-button:hover {
+    color:aliceblue;
+    background-color: antiquewhite;
+}
+
+#created-div {
+    height: 20vh;
+}
+
+#progress-div {
+    height: 20vh;
+}
+
+#courses-div {
+    height: 60vh;
+}

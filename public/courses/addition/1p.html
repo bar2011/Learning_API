@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Addition Course</title>
+    <link rel="stylesheet" href="../courses.css">
+    <script src="../../sketch.js"></script>
+    <script src="addition.js" id="addition"></script>
+</head>
+
+<body>
+    <!--
+        part 1: theoretical addition with objects
+        part 2: 0-9 addition
+        part 3: column addition explained
+        part 4: 10-100
+        part 5: practice
+    -->
+    <div>
+        <div class="div 1">
+            I want to see this<img src="../../images/speaker.png" class="audio-img" onclick="playText(1)">
+            <br><button onclick="showNext()" class="continue">Continue</button>
+        </div>
+        <div class="div 2">
+            Hello this is text about how addition works with<img src="../../images/speaker.png" class="audio-img"
+                onclick="playText(2)"> images and stuff i will work on it later<img src="../../images/speaker.png"
+                class="audio-img" onclick="playText(2.1)">
+            <br><button onclick="showNext()" class="continue">Continue</button>
+        </div>
+        <div class="div 2" style="display: block;">
+            <fieldset>
+                <legend> This is a qquesiotn </legend>
+                <div>dog</div>
+                <div>house</div>
+                <div>purse</div>
+                <div>crate</div>
+                <div>dog</div>
+            </fieldset><br><button onclick="showNext()" class="continue">Continue</button>
+        </div>
+        <div class="div 3">
+            This is finishing text<img src="../../images/speaker.png" class="audio-img" onclick="playText(3)">>
+            <br><button onclick="addition_course.finishLevel(1)" class="continue">Finish</button>
+        </div>
+    </div>
+</body>
+
+</html>

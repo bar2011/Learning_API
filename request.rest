@@ -1,0 +1,42 @@
+GET http://localhost:3000
+
+###
+
+GET http://localhost:3000/courses
+
+###
+
+GET http://localhost:3000/courses/answers
+
+###
+
+POST http://localhost:3000/courses/answers
+Content-Type: application/json
+
+{
+    "id": 2022,
+    "answer": 2
+}
+
+###
+
+POST http://localhost:3000/courses/answers
+Content-Type: application/json
+
+{
+    "id": "addition",
+    "answer": "null"
+}
+
+###
+
+GET http://localhost:3000/courses/answers/2022
+
+###
+
+POST http://localhost:3000/courses/answers/doi1
+Content-Type: application/json
+
+{
+    "answer": 2
+}
