@@ -16,15 +16,32 @@ router.get('/answers', (req, res) => {
 
 router.post('/answers', async (req, res) => {
     const answer = answers.find(answer => answer.id === "" + req.body.id)
-    if (answer != null || req.body.answer > 3 || req.body.id == "") return res.status(400).send()
+    if (answer != null || req.body.id == "") return res.status(400).send()
     try {
         const hashedAnswer = await bcrypt.hash("" + req.body.answer, 10)
         const answer = { id: "" + req.body.id, answer: hashedAnswer }
         answers.push(answer)
-        res.status(201).send()
+        res.sendStatus(201)
     } catch {
-        res.status(500).send()
+        res.sendStatus(500)
     }
+})
+
+const options_list = []
+router.post('/options', (req, res) => {
+    var options = options_list.find(options => options.id === req.body.id)
+    if (options != null) return res.sendStatus(400)
+    options = { id: "" + req.body.id, options: req.body.options }
+    options_list.push(options)
+    res.sendStatus(201)
+})
+router.get('/options', (req, res) => {
+    res.send(options_list)
+})
+router.get('/options/:id', (req, res) => {
+    var options = options_list.find(options => options.id === req.params.id)
+    if (options == null) return res.status(404).send(error404)
+    res.send(options.options)
 })
 
 router.post('/answers/final', async (req, res) => {
@@ -130,6 +147,7 @@ router.get('/:id/:part', (req, res) => {
     for (let i=0; i< courses.length; i++) {
         if (courses[i].id == req.params.id) {
             let course = JSON.parse(courses[i].course)
+            console.log("course html: " + course.html)
             chapterHTML += course.html[partNum-1]
             break
         }
@@ -164,12 +182,10 @@ router
     })
 
 router.post('/', (req, res) => {
-    console.log('HERE')
     var course = courses.find(course => course.id === req.body.id)
     if (course != null) return res.status(400).send()
     course = { id: "" + req.body.id, course: req.body.course }
     courses.push(course)
-    console.log(courses)
     res.status(201).send()
 })
 

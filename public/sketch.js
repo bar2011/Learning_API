@@ -15,6 +15,7 @@ class Course {
         this.divs = document.getElementsByClassName('div');
         this.chapters = document.getElementsByClassName('chapter-div');
         this.buttons = document.getElementsByClassName('continue');
+        this.questions = document.getElementsByTagName('fieldset')
         this.synth = window.speechSynthesis;
         this.COURSE_LANGUAGE = lang;
         this.voices = [];
@@ -80,6 +81,7 @@ class Course {
             data: {course: JSON.stringify(this)}
         });
         this.showDivs();
+        $.ajax({type: "PUT", url: '/courses'+this.id, data: {course: this}})
     }
 
     showFinal() {
@@ -163,10 +165,59 @@ class Course {
     async getCourse() {
         let course
         await $.get("/courses/"+id, function(data, status){
-            console.log(data.course)
             course = JSON.parse(data.course)
         })
         return course
+    }
+
+    generateQuestions() {
+        for (let questionNumber=1; questionNumber<= this.questions.length; questionNumber++) {
+            let questionDiv = this.questions[questionNumber-1]
+            let childDivs = questionDiv.getElementsByTagName('div')
+
+
+            let options = JSON.parse($.ajax({type: "GET", url: '/courses/options/'+this.id+this.progress+'p'+questionNumber, async: false}).responseText);
+            options = this.shuffle(options)
+            var finalOptions = []
+            for (let i = 0; i < options.length; i++) {
+                let isAnswer = false
+                // add options[i] to post request or something
+                isAnswer = $.ajax({type: "POST", url: '/courses/answers/'+this.id+this.progress+'p'+questionNumber, data: {answer:options[i]}, async: false}).responseText
+                if (isAnswer == "true") {
+                    finalOptions.push(options[i])
+                    options.splice(i, 1)
+                }
+            }
+            for (let i=0; i< 3; i++) {
+                finalOptions.push(options[i])
+            }
+            finalOptions = this.shuffle(finalOptions)
+            
+
+            for (let i=0; i< finalOptions.length; i++) {
+                childDivs[i].childNodes[0].value = finalOptions[i]
+                childDivs[i].childNodes[1].innerHTML = finalOptions[i]
+            }
+        }
+        $.ajax({type: "PUT", url: '/courses'+this.id, data: {course: this}})
+    }
+
+    shuffle(array) {
+        let currentIndex = array.length,  randomIndex;
+      
+        // While there remain elements to shuffle.
+        while (currentIndex != 0) {
+      
+          // Pick a remaining element.
+          randomIndex = Math.floor(Math.random() * currentIndex);
+          currentIndex--;
+      
+          // And swap it with the current element.
+          [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+        }
+      
+        return array;
     }
 }
 

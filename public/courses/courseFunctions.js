@@ -2,7 +2,8 @@ var script = document.createElement('script');
 script.src = 'https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js';
 document.getElementsByTagName('head')[0].appendChild(script);
  
-var id = "addition";
+var id = location.href.split('/');
+id = id[id.length-2]
 var course
 
 var divs = document.getElementsByClassName('div');

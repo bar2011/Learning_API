@@ -48,7 +48,7 @@ async function convertToHTML() {
                         // createQuestionDiv(qn, i+1)
                         let chapterSection = document.createElement('div')
                         chapterSection.className = 'div ' + sectionNumber++
-                        chapterSection.appendChild(createQuestionDiv(question_n, j+1))
+                        chapterSection.appendChild(createQuestionDiv(i+1, question_n, j+1))
                         chapterSection.appendChild(document.createElement('br'))
                         chapterSection.appendChild($.parseHTML('<button onclick="showNext()" class="continue">Continue</button>')[0])
                         mainDivs[i].appendChild(chapterSection)
@@ -89,17 +89,18 @@ function createTextDiv(indexStart) {
     return textDiv;
 }
 
-function createQuestionDiv(questionNumber, indexStart) {
+function createQuestionDiv(chapterNumber, questionNumber, indexStart) {
     let questionText = createTextWithAudio(text.substring(indexStart, getIndexWithoutAudio(text, '{c}', indexStart)))
     let answerText = createTextWithAudio(text.substring(getIndexWithoutAudio(text, '{c}', indexStart)+3, getIndexWithoutAudio(text, 'o{', indexStart)))
     let possibleAnswers = createTextWithAudio(text.substring(getIndexWithoutAudio(text, 'o{', indexStart)+2, getIndexWithoutAudio(text, '}o', indexStart)).split(', '))
-    question = createQuestion(questionNumber, questionText, answerText, possibleAnswers)
+    question = createQuestion(chapterNumber, questionNumber, questionText, answerText, possibleAnswers)
     return question;
     // return;
 }
 
-function createQuestion(questionNumber, questionText, answerText, possibleAnswers) {
+function createQuestion(chapterNumber, questionNumber, questionText, answerText, possibleAnswers) {
     let questionDiv = document.createElement("fieldset");
+    questionDiv.id = id+chapterNumber+'p'+questionNumber
     questionDiv.appendChild(document.createElement("legend"));
     questionDiv.childNodes[0].innerHTML = questionText;
     let answers = shuffle(possibleAnswers).slice(0, 3);
@@ -109,17 +110,19 @@ function createQuestion(questionNumber, questionText, answerText, possibleAnswer
         let currentDiv = document.createElement("div")
         currentDiv.appendChild(document.createElement("input"))
         currentDiv.childNodes[0].type = "radio"
-        currentDiv.childNodes[0].id = answers[i-1]+'|'+questionText
-        currentDiv.childNodes[0].name = questionText
+        currentDiv.childNodes[0].id = id+chapterNumber+'p'+questionNumber+'o'+i
+        currentDiv.childNodes[0].name = questionText + questionNumber
         currentDiv.childNodes[0].value = answers[i-1]
         if (i==1) currentDiv.childNodes[0].checked = true
         currentDiv.appendChild(document.createElement("label"))
         currentDiv.childNodes[1].innerHTML = answers[i-1]
-        currentDiv.childNodes[1].htmlFor = answers[i-1]+'|'+questionText
+        currentDiv.childNodes[1].htmlFor = id+chapterNumber+'p'+questionNumber+'o'+i
         questionDiv.appendChild(currentDiv)
     }
     let skip = false;
-    $.post('/courses/answers/', {id: id + questionNumber, answer: answerText})
+    possibleAnswers.push(answerText)
+    $.post('/courses/options/', {id: id + chapterNumber + 'p' + questionNumber, options: JSON.stringify(shuffle(possibleAnswers))})
+    $.post('/courses/answers/', {id: id + chapterNumber + 'p' + questionNumber, answer: answerText})
     .fail(async function() {
         skip = true;
         // await alert('Yo man, you gotta try again with another ID, just remeber that the ID isn\'t the name so it doesn\'t have to be the same\n' + id + questionNumber);
@@ -239,6 +242,8 @@ function shuffle(array) {
     return array;
 }
 /*
+p{
 t{ This is some text that I put here }t
 q{ This is a qquesiotn {c} Hello o{cat, dog, house as, notebook jf, bot tle, monitor, flag, U בSA}o}q
+}p
 */
