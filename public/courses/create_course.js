@@ -1,39 +1,39 @@
-var maininput;
-var text;
+var inputDiv;
+var inputtedText;
 var id;
+var title;
+
+$(document).ready(function() {
+    inputDiv = document.getElementById("main-input");
+})
 
 async function convertToHTML() {
-    maininput = document.getElementById("main-input");
-    text = maininput.value;
+    inputtedText = inputDiv.value;
     let mainDivs = []
-    id = prompt("Before converting to course, choose an ID for the course.")
-    var skip = false;
-    try {
-        await $.ajax({
-            type: 'GET',
-            url: '/courses/'+id,
-            success: function(result) {
-                skip = true
-                alert('Yaoasd man, you gotta try again with another ID, just remeber that the ID isn\'t the name so it doesn\'t have to be the same');
-                throw new TypeError("Invalid ID");
-            }
-        });
-    } catch {  }
-    if (skip) return;
+    // Get course ID by checking the number of courses (i.e. the ID of the final course) and adding 1
+    await $.get("/courses", function(data, status){
+        id = data.length+1
+    })
+
+    title = prompt("Before creating the course, please choose a title for the course.\nThe title needs to be at least 3 characters long and contain no special characters in it")
+    // Check if title meets requirements: doesn't contain special character and at least 3 characters long
+    if (!/^[\w\d\s]+$/.test(title) || title.length < 3) return alert("The title you entered is invalid")
+    console.log(`ID: ${id}\nTitle: ${title}`)
+
     let chapterIndexes = []
-    for (let i=0; i< text.length; i++) {
-        if (text.charAt(i) == 'p' && text.charAt(i+1) == '{') {
+    for (let i=0; i< inputtedText.length; i++) {
+        if (inputtedText.charAt(i) == 'p' && inputtedText.charAt(i+1) == '{') {
             chapterIndexes.push(i)
             mainDivs.push(document.createElement("div"))
         }
     }
-    chapterIndexes.push(text.length)
+    chapterIndexes.push(inputtedText.length)
     for (let i=0; i< chapterIndexes.length-1; i++) {
         let question_n = 0;
         let sectionNumber = 1;
         for (let j= chapterIndexes[i]; j < chapterIndexes[i+1]; j++) {
-            if (text.charAt(j) == '{' && text.charAt(j+1) == ' ') {
-                switch (text.charAt(j-1).toLowerCase()) {
+            if (inputtedText.charAt(j) == '{' && inputtedText.charAt(j+1) == ' ') {
+                switch (inputtedText.charAt(j-1).toLowerCase()) {
                     case 't': {
                         let chapterSection = document.createElement('div')
                         chapterSection.className = 'div ' + sectionNumber++
@@ -66,36 +66,34 @@ async function convertToHTML() {
     for (let i=0; i< mainDivs.length; i++) {
         mainDivsString.push(mainDivs[i].outerHTML)
     }
-    var course = new Course(id, "descwersuhnfuiosgedfb9iso", 1, 1, id, mainDivsString)
-    $.post('/courses', { id: id, course: JSON.stringify(course) },
-        function(data, status){
-            // alert('Data: ' + data + '\nStatus: ' + status)
+    $.ajax({
+        url: '/courses',
+        type: 'POST',
+        data: {
+            title: title,
+            description: 'NULL',
+            html: mainDivsString.join()
         }
-    );
-    console.log(course.html)
+    })
     for (let i=0; i< mainDivsString.length; i++) {
-        $(course.html[i]).appendTo("body")
+        $(mainDivsString[i]).appendTo("body")
         $(document.createElement("br")).appendTo("body")
     }
 }
 
 function createTextDiv(indexStart) {
     let textDiv = document.createElement('div');
-    let textWithAudio = createTextWithAudio(text.substring(indexStart, getIndexWithoutAudio(text, '}t', indexStart)))
-    // for (let i=0; i< textWithAudio.length; i++) {
-    //     // textDiv.appendChild(textWithAudio[i])
-    // }
-    textDiv.textContent = textWithAudio;
+    let text = inputtedText.substring(indexStart, inputtedText.indexOf('}t', indexStart))
+    textDiv.textContent = text;
     return textDiv;
 }
 
 function createQuestionDiv(chapterNumber, questionNumber, indexStart) {
-    let questionText = createTextWithAudio(text.substring(indexStart, getIndexWithoutAudio(text, '{c}', indexStart)))
-    let answerText = createTextWithAudio(text.substring(getIndexWithoutAudio(text, '{c}', indexStart)+3, getIndexWithoutAudio(text, 'o{', indexStart)))
-    let possibleAnswers = createTextWithAudio(text.substring(getIndexWithoutAudio(text, 'o{', indexStart)+2, getIndexWithoutAudio(text, '}o', indexStart)).split(', '))
+    let questionText = inputtedText.substring(indexStart, inputtedText.indexOf('{c}', indexStart))
+    let answerText = inputtedText.substring(inputtedText.indexOf('{c}', indexStart)+3, inputtedText.indexOf('o{', indexStart))
+    let possibleAnswers = inputtedText.substring(inputtedText.indexOf('o{', indexStart)+2, inputtedText.indexOf('}o', indexStart)).split(', ')
     question = createQuestion(chapterNumber, questionNumber, questionText, answerText, possibleAnswers)
     return question;
-    // return;
 }
 
 function createQuestion(chapterNumber, questionNumber, questionText, answerText, possibleAnswers) {
@@ -119,112 +117,14 @@ function createQuestion(chapterNumber, questionNumber, questionText, answerText,
         currentDiv.childNodes[1].htmlFor = id+chapterNumber+'p'+questionNumber+'o'+i
         questionDiv.appendChild(currentDiv)
     }
-    let skip = false;
     possibleAnswers.push(answerText)
-    $.post('/courses/options/', {id: id + chapterNumber + 'p' + questionNumber, options: JSON.stringify(shuffle(possibleAnswers))})
-    $.post('/courses/answers/', {id: id + chapterNumber + 'p' + questionNumber, answer: answerText})
-    .fail(async function() {
-        skip = true;
-        // await alert('Yo man, you gotta try again with another ID, just remeber that the ID isn\'t the name so it doesn\'t have to be the same\n' + id + questionNumber);
-        // console.log(id + questionNumber)
-        throw new TypeError("Invalid ID");
-    });
-
-    if (skip) return;
+    $.post('/courses/options/', {course_id: id, question_id: `${chapterNumber}p${questionNumber}q`, options_list: shuffle(possibleAnswers)})
+    $.post('/courses/answers/', {course_id: id, question_id: `${chapterNumber}p${questionNumber}q`, answer: answerText})
     return questionDiv;
 }
 
-function createTextWithAudio(plainText) {
-    elementIndexes = [];
-    elements = [];
-    if (Array.isArray(plainText)) {
-        plainText.forEach(textElement => {
-            elementIndexes = (findAudioIndexes(textElement));
-            for (let i=0; i< elementIndexes.length-1; i++) {
-                let element;
-                if (i == 0) {
-                    element = document.createElement("text")
-                    element.textContent = textElement.substring(0, elementIndexes[i]);
-                    elements.push(element);
-                } else if (i % 2 == 1) {
-                    element = document.createElement("img");
-                    element.src = "../../images/speaker.png";
-                    element.classList.add("audio-img");
-                    // element.onclick = "playText(" + (1 + ((i-1)/2)/10) + ")";
-                    // element.addEventListener('click', playText(1 + ((i-1)/2)/10))
-                    elements.push(element);
-                } else {
-                    element = document.createElement("text")
-                    element.textContent = textElement.substring(elementIndexes[i-1], elementIndexes[i]);
-                    elements.push(element);
-                }
-                $(element).appendTo("body");
-            }
-        });
-    } else {
-        elementIndexes = findAudioIndexes(plainText);
-        for (let i=0; i< elementIndexes.length; i++) {
-            let element;
-            if (i == 0) {
-                element = document.createElement("text")
-                element.textContent = plainText.substring(0, elementIndexes[i]);
-                elements.push(element);
-            } else if (i % 2 == 1) {
-                element = document.createElement("img");
-                element.src = "../../images/speaker.png";
-                element.classList.add("audio-img");
-                element.onclick = "playText(" + (1 + ((i-1)/2)/10) + ")";
-                elements.push(element);
-            } else {
-                element = document.createElement("text")
-                element.textContent = plainText.substring(elementIndexes[i-1], elementIndexes[i]);
-                elements.push(element);
-            }
-            $(element).appendTo("body");
-        }
-    }
-    return plainText;
-}
-
-function findAudioIndexes(plainText) {
-    let elementIndexes = [];
-    let indexStart = 0;
-    let currentIndex = plainText.indexOf("{a}", indexStart);
-    elementIndexes.push(currentIndex);
-    while (currentIndex != -1) {
-        if (elementIndexes.length % 2 == 1) {
-            indexStart = plainText.indexOf("{a}", indexStart)+3;
-            currentIndex = indexStart;
-            elementIndexes.push(currentIndex)
-        } else {
-            currentIndex = plainText.indexOf("{a}", indexStart);
-            elementIndexes.push(currentIndex)
-        }
-    }
-    return elementIndexes;
-}
-
-function getIndexWithoutAudio(textToSearchIn, searchString, indexStart) {
-    let found = false;
-    let currentFind = textToSearchIn.indexOf(searchString, indexStart)
-    let currentIndexStart = currentFind+searchString.length;
-    while (!found) {
-        if (textToSearchIn.charAt(currentIndexStart) == 'a') {
-            currentFind = textToSearchIn.indexOf(searchString, currentIndexStart);
-            currentIndexStart = currentFind+1;
-        }
-        else if (textToSearchIn.charAt(currentFind-1) == 'a') {
-            currentFind = textToSearchIn.indexOf(searchString, currentIndexStart);
-            currentIndexStart = currentFind+1;
-        }
-        else {
-            found = true;
-        }
-    }
-    return currentFind;
-}
-
 function shuffle(array) {
+    // Shuffles an array. from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
     let currentIndex = array.length,  randomIndex;
   
     // While there remain elements to shuffle.

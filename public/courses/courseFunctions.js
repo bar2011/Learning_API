@@ -23,7 +23,5 @@ function reset() {
 }
 
 window.onload = async (event) => {
-    console.log('load')
-    course = new Course("Addition", "addition stuff", 1, 1, id, await $("body")[0].childNodes[3]) // temp
-    course = init(id, course)
+    course = await init(id)
 }

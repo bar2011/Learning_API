@@ -6,6 +6,34 @@ GET http://localhost:3000/courses
 
 ###
 
+GET http://localhost:3000/courses/1
+
+###
+
+PUT http://localhost:3000/courses/asf
+Content-Type: application/json
+
+{
+    "title": "Asfd",
+    "description": null,
+    "div": 1,
+    "progress": 1,
+    "html": "sdfhnbiovwejhfnvo"
+}
+
+###
+
+POST http://localhost:3000/courses
+Content-Type: application/json
+
+{
+    "id": "asf",
+    "title": "Asf",
+    "html": "sdfhnbiovwejhfnvo"
+}
+
+###
+
 GET http://localhost:3000/courses/answers
 
 ###

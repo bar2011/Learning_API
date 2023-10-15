@@ -15,14 +15,10 @@ app.use(express.urlencoded({extended:true}));
 app.use(express.json())
 app.use(express.static('./public'))
 
-app.get('/', (req, res) => {
-    console.log('Here')
-})
-
 const coursesRouter = require('./routes/courses')
 
 app.use('/courses', coursesRouter)
 
 app.listen(3000, () => {
-    console.log('started')
+    console.log('Started server at http://localhost:3000')
 })
