@@ -1,126 +1,172 @@
-var inputDiv;
-var inputtedText;
-var id;
-var title;
+let inputDiv;
+let id;
+let title;
+let description = null;
 
 $(document).ready(function() {
     inputDiv = document.getElementById("main-input");
 })
 
-async function convertToHTML() {
-    inputtedText = inputDiv.value;
-    let mainDivs = []
+async function convertTextToHTML() {
     // Get course ID by checking the number of courses (i.e. the ID of the final course) and adding 1
     await $.get("/courses", function(data, status){
         id = data.length+1
     })
 
-    title = prompt("Before creating the course, please choose a title for the course.\nThe title needs to be at least 3 characters long and contain no special characters in it")
-    // Check if title meets requirements: doesn't contain special character and at least 3 characters long
-    if (!/^[\w\d\s]+$/.test(title) || title.length < 3) return alert("The title you entered is invalid")
-    console.log(`ID: ${id}\nTitle: ${title}`)
+    let inputtedText = inputDiv.value;
+    let chaptersHtmlArray = []
 
-    let chapterIndexes = []
+    title = prompt("Before creating the course, please choose a title for the course.\nThe title needs to be at least 3 characters long and at most 30 characters. Plus it can not contain any special characters in it")
+    // Check if title meets requirements
+    if (!/^[\w\d\s]+$/.test(title) || title.length < 3 || title.length > 30) return alert("The title you entered is invalid")
+    if (confirm("Do you also want to create a description for this course?"))
+        // Same thing with description
+        description = prompt("OK. Your description also can't contain special characters and needs to be at least 10 characters")
+        if (!/^[\w\d\s]+$/.test(description) || description.length < 10 || description.length > 1000) return alert("The description you entered is invalid")
+
+    // Add every chapters text to `chapters` array
+    // For every chapter, append a div element to `chaptersHtmlArray`
+    // to build on top of that div the actual chapter HTML
+    let chapters = []
+    let lastChapter = 0
     for (let i=0; i< inputtedText.length; i++) {
-        if (inputtedText.charAt(i) == 'p' && inputtedText.charAt(i+1) == '{') {
-            chapterIndexes.push(i)
-            mainDivs.push(document.createElement("div"))
+        // Find the end of a chapter and use `lastChapter` variable to get start of the chapter
+        if (inputtedText.substring(i, i+2) == "}p") {
+            chapters.push(inputtedText.substring(lastChapter, i+1))
+            lastChapter = i+2
+            
+            chaptersHtmlArray.push(document.createElement("div"))
         }
     }
-    chapterIndexes.push(inputtedText.length)
-    for (let i=0; i< chapterIndexes.length-1; i++) {
-        let question_n = 0;
-        let sectionNumber = 1;
-        for (let j= chapterIndexes[i]; j < chapterIndexes[i+1]; j++) {
-            if (inputtedText.charAt(j) == '{' && inputtedText.charAt(j+1) == ' ') {
-                switch (inputtedText.charAt(j-1).toLowerCase()) {
-                    case 't': {
-                        let chapterSection = document.createElement('div')
-                        chapterSection.className = 'div ' + sectionNumber++
-                        chapterSection.appendChild(createTextDiv(j+1))
-                        chapterSection.appendChild(document.createElement('br'))
-                        chapterSection.appendChild($.parseHTML('<button onclick="showNext()" class="continue">Continue</button>')[0])
-                        mainDivs[i].appendChild(chapterSection)
-                        break;
-                    }
-                    case 'q': {
-                        question_n+=1
-                        // createQuestionDiv(qn, i+1)
-                        let chapterSection = document.createElement('div')
-                        chapterSection.className = 'div ' + sectionNumber++
-                        chapterSection.appendChild(createQuestionDiv(i+1, question_n, j+1))
-                        chapterSection.appendChild(document.createElement('br'))
-                        chapterSection.appendChild($.parseHTML('<button onclick="showNext()" class="continue">Continue</button>')[0])
-                        mainDivs[i].appendChild(chapterSection)
-                        break;
-                    }
+    
+    for (let i=0; i< chapters.length; i++) {
+        let chapter = createChapter(chapters[i], i+1)
+        chapter.forEach(chapterSection => {
+            chaptersHtmlArray[i].appendChild(chapterSection)
+        })
+    }
+
+    sendCourseToServer(chaptersHtmlArray)
+}
+
+function createChapter(chapterText, chapterNumber) {
+    let chapterHtmlArray = [];
+
+    let questionNumber = 0;
+    let sectionNumber = 1;
+    // Loop over every character in the chapter
+    for (let j= 0; j < chapterText.length; j++) {
+        // Check for an expression start and then check for the type of expression
+        if (inputtedText.substring(j, j+2) == '{ ') {
+            switch (inputtedText.charAt(j-1).toLowerCase()) {
+                case 't': {
+                    // Create text chapter section
+                    let textDiv = createTextDiv(chapterText, j+1)
+                    let chapterSection = createChapterSection(textDiv, sectionNumber++)
+                    chapterHtmlArray.appendChild(chapterSection)
+                    break;
+                }
+                case 'q': {
+                    // Create question chapter section
+                    let questionDiv = getQuestionDiv(chapterText, chapterNumber, questionNumber++, j+1)
+                    let chapterSection = createChapterSection(questionDiv, sectionNumber++)
+                    chapterHtmlArray.appendChild(chapterSection)
+                    break;
                 }
             }
         }
-        let finishSection = document.createElement('div')
-        finishSection.className = 'div ' + sectionNumber++
-        finishSection.appendChild($.parseHTML('<button onclick="course.finishLevel(' + (i+1) + ')" class="finish continue">Finish</button>')[0])
-        mainDivs[i].appendChild(finishSection)
     }
-    let mainDivsString = []
-    for (let i=0; i< mainDivs.length; i++) {
-        mainDivsString.push(mainDivs[i].outerHTML)
+    // Create the finishing section of the chapter
+    let chapterFinishingSection = document.createElement('div')
+    chapterFinishingSection.className = 'div ' + sectionNumber++
+    chapterFinishingSection.appendChild($.parseHTML(`<button onclick="course.finishLevel(${chapterNumber})" class="finish continue">Finish</button>`)[0])
+    chapterHtmlArray.appendChild(chapterFinishingSection)
+
+    return chapterHtmlArray
+}
+
+function sendCourseToServer(chapterHtmlArray) {
+    let chapterStringArray = []
+    // Add actual text instead of elements to `chapterStringArray`
+    for (let i=0; i< chapterHtmlArray.length; i++) {
+        chapterStringArray.push(chapterHtmlArray[i].outerHTML)
     }
+    // Add course to server
     $.ajax({
         url: '/courses',
         type: 'POST',
         data: {
             title: title,
-            description: 'NULL',
-            html: mainDivsString.join()
+            description: description,
+            html: chapterStringArray.join()
         }
     })
-    for (let i=0; i< mainDivsString.length; i++) {
-        $(mainDivsString[i]).appendTo("body")
-        $(document.createElement("br")).appendTo("body")
-    }
 }
 
-function createTextDiv(indexStart) {
+// `mainDiv` is the text or question div
+function createChapterSection(mainDiv, sectionNumber) {
+    let chapterSection = document.createElement('div')
+    chapterSection.className = 'div ' + sectionNumber++
+    chapterSection.appendChild(mainDiv)
+
+    // Add button for continuing in the chapter
+    chapterSection.appendChild(document.createElement('br'))
+    chapterSection.appendChild($.parseHTML('<button onclick="showNext()" class="continue">Continue</button>')[0])
+
+    return chapterSection
+}
+
+function createTextDiv(chapterText, indexStart) {
     let textDiv = document.createElement('div');
-    let text = inputtedText.substring(indexStart, inputtedText.indexOf('}t', indexStart))
+    // Get the text content from `chapterText`
+    let text = chapterText.substring(indexStart, chapterText.indexOf('}t', indexStart))
     textDiv.textContent = text;
     return textDiv;
 }
 
-function createQuestionDiv(chapterNumber, questionNumber, indexStart) {
-    let questionText = inputtedText.substring(indexStart, inputtedText.indexOf('{c}', indexStart))
-    let answerText = inputtedText.substring(inputtedText.indexOf('{c}', indexStart)+3, inputtedText.indexOf('o{', indexStart))
-    let possibleAnswers = inputtedText.substring(inputtedText.indexOf('o{', indexStart)+2, inputtedText.indexOf('}o', indexStart)).split(', ')
-    question = createQuestion(chapterNumber, questionNumber, questionText, answerText, possibleAnswers)
+// Using chapterNumber and questionNumber only for assigning id to elements and for database
+function getQuestionDiv(chapterText, chapterNumber, questionNumber, indexStart) {
+    // Extracr question, answer and options from `chapterText`
+    let questionText = chapterText.substring(indexStart, chapterText.indexOf('{c}', indexStart))
+    let answerText = chapterText.substring(chapterText.indexOf('{c}', indexStart)+3, chapterText.indexOf('o{', indexStart))
+    let options = chapterText.substring(chapterText.indexOf('o{', indexStart)+2, chapterText.indexOf('}o', indexStart)).split(', ')
+    question = createQuestionHtml(chapterNumber, questionNumber, questionText, answerText, options)
     return question;
 }
 
-function createQuestion(chapterNumber, questionNumber, questionText, answerText, possibleAnswers) {
-    let questionDiv = document.createElement("fieldset");
-    questionDiv.id = id+chapterNumber+'p'+questionNumber
-    questionDiv.appendChild(document.createElement("legend"));
-    questionDiv.childNodes[0].innerHTML = questionText;
-    let answers = shuffle(possibleAnswers).slice(0, 3);
-    answers.push(answerText)
-    answers = shuffle(answers)
-    for (let i=1; i<= answers.length; i++) {
+function createQuestionHtml(chapterNumber, questionNumber, questionText, answerText, options) {
+    // Create parent question element
+    let questionNode = document.createElement("fieldset");
+    questionNode.id = id+'i'+chapterNumber+'p'+questionNumber+'q'
+    questionNode.appendChild(document.createElement("legend"));
+    questionNode.childNodes[0].innerHTML = questionText;
+
+    // Create first set of options
+    let starterOptions = shuffle(options).slice(0, 3);
+    starterOptions.push(answerText)
+    starterOptions = shuffle(starterOptions)
+
+    // Create HTML for each option
+    for (let i=1; i<= starterOptions.length; i++) {
         let currentDiv = document.createElement("div")
         currentDiv.appendChild(document.createElement("input"))
         currentDiv.childNodes[0].type = "radio"
-        currentDiv.childNodes[0].id = id+chapterNumber+'p'+questionNumber+'o'+i
+        currentDiv.childNodes[0].id = id+'i'+chapterNumber+'p'+questionNumber+'q'+i+'o'
         currentDiv.childNodes[0].name = questionText + questionNumber
-        currentDiv.childNodes[0].value = answers[i-1]
+        currentDiv.childNodes[0].value = starterOptions[i-1]
         if (i==1) currentDiv.childNodes[0].checked = true
         currentDiv.appendChild(document.createElement("label"))
-        currentDiv.childNodes[1].innerHTML = answers[i-1]
-        currentDiv.childNodes[1].htmlFor = id+chapterNumber+'p'+questionNumber+'o'+i
-        questionDiv.appendChild(currentDiv)
+        currentDiv.childNodes[1].innerHTML = starterOptions[i-1]
+        currentDiv.childNodes[1].htmlFor = id+'i'+chapterNumber+'p'+questionNumber+'q'+i+'o'
+        questionNode.appendChild(currentDiv)
     }
-    possibleAnswers.push(answerText)
-    $.post('/courses/options/', {course_id: id, question_id: `${chapterNumber}p${questionNumber}q`, options_list: shuffle(possibleAnswers)})
+
+    // Send question to server
+    options.push(answerText)
+    $.post('/courses/options/', {course_id: id, question_id: `${chapterNumber}p${questionNumber}q`, options_list: shuffle(options)})
     $.post('/courses/answers/', {course_id: id, question_id: `${chapterNumber}p${questionNumber}q`, answer: answerText})
-    return questionDiv;
+
+    return questionNode;
 }
 
 function shuffle(array) {
