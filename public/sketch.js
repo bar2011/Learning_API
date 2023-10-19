@@ -16,14 +16,39 @@ class Course {
         this.questions = document.getElementsByTagName('fieldset')
     }
 
-    showNext() {
+    async showNext() {
+        if (this.divs[this.current_div-1].childNodes[0].tagName === "FIELDSET") {
+            if (!await this.checkQuestion()) return
+        }
         this.current_div++;
         this.showDivs();
         this.updateCourse()
     }
 
-    showFinal() {
-        // TODO: create this function to declare final_answer based on users answer (should only fire after the last question) + add shownext for questions
+    async checkQuestion() {
+        let chosenAnswer = null
+        const questionFieldset = this.divs[this.current_div-1].childNodes[0]
+        questionFieldset.childNodes.forEach(div => {
+            let currentInputNode = div.childNodes[0]
+            if (currentInputNode.checked) chosenAnswer = currentInputNode
+        })
+        let questionId = questionFieldset.id.match(/i\d+p\d+q/)[0].substring(1)
+
+        let isCorrectAnswer = false
+        await $.ajax({
+            type: 'POST',
+            url: `/courses/answers/${this.id},${questionId}`,
+            data: { option: chosenAnswer.value },
+            success: function(data, status){
+                isCorrectAnswer = data
+            },
+            async: "false"
+        })
+        if (!isCorrectAnswer) {
+            chosenAnswer.checked = false
+            await this.generateQuestions()
+        }
+        return isCorrectAnswer
     }
 
     showDivs() {
@@ -45,13 +70,10 @@ class Course {
     }
 
     reset() {
-        // Change this to PUT request
         if (confirm("Are you sure you want to reset all progress on this course?")) {
-            $.ajax({
-                url: `/courses/${this.id}`,
-                type: 'DELETE'
-            });
-            location.reload();
+            this.progress = 1
+            this.current_div = 1
+            this.updateCourse()
         }
     }
 
@@ -85,10 +107,14 @@ class Course {
         for (let questionNumber=1; questionNumber<= this.questions.length; questionNumber++) {
             let questionDiv = this.questions[questionNumber-1]
             let questionChildDivs = questionDiv.getElementsByTagName('div')
-            let options = await $.ajax({
+            let options
+            await $.ajax({
                 type: "GET",
-                url: `/courses/options/${this.id},${this.progress}p${questionNumber}q`
-            }).responseText;
+                url: `/courses/options/${this.id},${this.progress}p${questionNumber}q`,
+                success: function(data, status) {
+                    options = data
+                }
+            });
             // Get actual options from list of {course_id, question_id, question_option}
             options = options.map((item) => {
                 return item.question_option
@@ -99,16 +125,20 @@ class Course {
         this.updateCourse()
     }
 
-    generateQuestion(questionChildDivs, questionNumber, options) {
+    async generateQuestion(questionChildDivs, questionNumber, options) {
         var shownOptions = []
         // Add the actual answer to shownOptions array
         for (let i = 0; i < options.length; i++) {
-            let isAnswer = $.ajax({
+            let isAnswer
+            await $.ajax({
                 type: "POST",
                 url: `/courses/answers/${this.id},${this.progress}p${questionNumber}q`,
-                data: { option: options[i] }
-            }).responseText
-            if (isAnswer == "true") {
+                data: { option: options[i] },
+                success: function(data, status) {
+                    isAnswer = data
+                }
+            })
+            if (isAnswer === true) {
                 shownOptions.push(options[i])
                 options.splice(i, 1)
                 break
@@ -179,5 +209,3 @@ async function init(id) {
     course.showDocument()
     return course;
 }
-
-// mystery: refreshing after loading questions doesn't work (error)
