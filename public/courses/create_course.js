@@ -1,4 +1,5 @@
 let inputDiv;
+let inputtedText;
 let id;
 let title;
 let description = null;
@@ -13,7 +14,7 @@ async function convertTextToHTML() {
         id = data.length+1
     })
 
-    let inputtedText = inputDiv.value;
+    inputtedText = inputDiv.value;
     let chaptersHtmlArray = []
 
     title = prompt("Before creating the course, please choose a title for the course.\nThe title needs to be at least 3 characters long and at most 30 characters. Plus it can not contain any special characters in it")
@@ -52,7 +53,7 @@ async function convertTextToHTML() {
 function createChapter(chapterText, chapterNumber) {
     let chapterHtmlArray = [];
 
-    let questionNumber = 0;
+    let questionNumber = 1;
     let sectionNumber = 1;
     // Loop over every character in the chapter
     for (let j= 0; j < chapterText.length; j++) {
@@ -63,14 +64,14 @@ function createChapter(chapterText, chapterNumber) {
                     // Create text chapter section
                     let textDiv = createTextDiv(chapterText, j+1)
                     let chapterSection = createChapterSection(textDiv, sectionNumber++)
-                    chapterHtmlArray.appendChild(chapterSection)
+                    chapterHtmlArray.push(chapterSection)
                     break;
                 }
                 case 'q': {
                     // Create question chapter section
                     let questionDiv = getQuestionDiv(chapterText, chapterNumber, questionNumber++, j+1)
                     let chapterSection = createChapterSection(questionDiv, sectionNumber++)
-                    chapterHtmlArray.appendChild(chapterSection)
+                    chapterHtmlArray.push(chapterSection)
                     break;
                 }
             }
@@ -80,7 +81,7 @@ function createChapter(chapterText, chapterNumber) {
     let chapterFinishingSection = document.createElement('div')
     chapterFinishingSection.className = 'div ' + sectionNumber++
     chapterFinishingSection.appendChild($.parseHTML(`<button onclick="course.finishLevel(${chapterNumber})" class="finish continue">Finish</button>`)[0])
-    chapterHtmlArray.appendChild(chapterFinishingSection)
+    chapterHtmlArray.push(chapterFinishingSection)
 
     return chapterHtmlArray
 }

@@ -218,7 +218,7 @@ router.post('/', async (req, res) => {
     if ((await getRequest(`/courses/${req.body.id}`)).statusCode == 200) return res.sendStatus(400)
 
     // Insert a new course into courses table
-    runSqlCode(`INSERT INTO courses (course_title, course_description, course_html) VALUES (?, ${req.body.description}, '${req.body.html}')`, [req.body.title])
+    runSqlCode(`INSERT INTO courses (course_title, course_description, course_html) VALUES (?, ?, '${req.body.html}')`, [req.body.title, req.body.description])
     res.sendStatus(201)
 })
 
