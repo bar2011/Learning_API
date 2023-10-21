@@ -21,9 +21,11 @@ async function convertTextToHTML() {
     // Check if title meets requirements
     if (!/^[\w\d\s]+$/.test(title) || title.length < 3 || title.length > 30) return alert("The title you entered is invalid")
     if (confirm("Do you also want to create a description for this course?"))
+    {
         // Same thing with description
         description = prompt("OK. Your description also can't contain special characters and needs to be at least 10 characters")
         if (!/^[\w\d\s]+$/.test(description) || description.length < 10 || description.length > 1000) return alert("The description you entered is invalid")
+    }
     else description = null
 
     // Add every chapters text to `chapters` array
