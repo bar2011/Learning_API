@@ -2,7 +2,7 @@ let inputDiv;
 let inputtedText;
 let id;
 let title;
-let description = null;
+let description;
 
 $(document).ready(function() {
     inputDiv = document.getElementById("main-input");
@@ -24,6 +24,7 @@ async function convertTextToHTML() {
         // Same thing with description
         description = prompt("OK. Your description also can't contain special characters and needs to be at least 10 characters")
         if (!/^[\w\d\s]+$/.test(description) || description.length < 10 || description.length > 1000) return alert("The description you entered is invalid")
+    else description = null
 
     // Add every chapters text to `chapters` array
     // For every chapter, append a div element to `chaptersHtmlArray`
