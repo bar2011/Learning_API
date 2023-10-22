@@ -1,5 +1,7 @@
 const express = require('express')
 const app = express()
+const coursesRouter = require('./routes/courses').router
+const runSqlCode = require('./routes/courses').runSqlCode
 
 // 200: OK 201: Created 204: No Content
 // 400: Bad req 401: Unauthorized 403: Forbidden 404: Not Found 409: Conflict
@@ -15,7 +17,12 @@ app.use(express.urlencoded({extended:true}));
 app.use(express.json())
 app.use(express.static('./public'))
 
-const coursesRouter = require('./routes/courses')
+app.set('view engine', 'ejs')
+
+app.get("/", async (req, res) => {
+    let courses = await runSqlCode("SELECT * FROM courses");
+    res.render('index', { courses })
+})
 
 app.use('/courses', coursesRouter)
 
