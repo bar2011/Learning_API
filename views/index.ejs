@@ -16,6 +16,7 @@
         <% courses.forEach(course => { %>
             <div id="<%= course.course_id %>" class="course" onclick="location.href='./courses/<%= course.course_id %>/intro'">
                 <h2><%= course.course_title %></h2>
+                <img src="./images/<% let imageUrl = course.course_image %><%= imageUrl.substring(imageUrl.lastIndexOf('/') + 1).trim() %>" width="187px" height="200px">
                 <p><%= course.course_description %></p>
             </div>
         <% }) %>

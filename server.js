@@ -2,6 +2,7 @@ const express = require('express')
 const app = express()
 const coursesRouter = require('./routes/courses').router
 const runSqlCode = require('./routes/courses').runSqlCode
+const getImageFromLink = require('./routes/courses').getImageFromLink
 
 // 200: OK 201: Created 204: No Content
 // 400: Bad req 401: Unauthorized 403: Forbidden 404: Not Found 409: Conflict
@@ -20,6 +21,10 @@ app.use(express.static('./public'))
 app.set('view engine', 'ejs')
 
 app.get("/", async (req, res) => {
+    let imageLinks = await runSqlCode("SELECT course_image FROM courses")
+    imageLinks.forEach(link => {
+        getImageFromLink(link.course_image)
+    });
     let courses = await runSqlCode("SELECT * FROM courses");
     res.render('index', { courses })
 })

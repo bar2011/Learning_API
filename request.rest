@@ -68,3 +68,12 @@ Content-Type: application/json
 {
     "answer": 2
 }
+
+###
+
+POST http://localhost:3000/courses/image
+Content-Type: application/json
+
+{
+    "url": "https://i.imgur.com/OAVSJvq.png"
+}
