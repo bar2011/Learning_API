@@ -27,6 +27,20 @@ async function convertTextToHTML() {
         if (!/^[\w\d\s]+$/.test(description) || description.length < 10 || description.length > 1000) return alert("The description you entered is invalid")
     }
     else description = null
+    let imageUrl = prompt("Last thing, enter a URL for your course's image")
+    $.ajax({
+        type: "POST",
+        url: "/courses/image",
+        data: {
+            url: imageUrl
+        },
+        statusCode: {
+            404: function() {
+              imageUrl = false
+            }
+          }
+    })
+    if (!imageUrl) return alert("The URL you entered was invalid");
 
     // Add every chapters text to `chapters` array
     // For every chapter, append a div element to `chaptersHtmlArray`
@@ -50,7 +64,7 @@ async function convertTextToHTML() {
         })
     }
 
-    sendCourseToServer(chaptersHtmlArray)
+    sendCourseToServer(chaptersHtmlArray, imageUrl)
 }
 
 function createChapter(chapterText, chapterNumber) {
@@ -89,7 +103,7 @@ function createChapter(chapterText, chapterNumber) {
     return chapterHtmlArray
 }
 
-function sendCourseToServer(chapterHtmlArray) {
+function sendCourseToServer(chapterHtmlArray, imageUrl) {
     let chapterStringArray = []
     // Add actual text instead of elements to `chapterStringArray`
     for (let i=0; i< chapterHtmlArray.length; i++) {
@@ -102,6 +116,7 @@ function sendCourseToServer(chapterHtmlArray) {
         data: {
             title: title,
             description: description,
+            image: imageUrl,
             html: chapterStringArray.join()
         }
     })
@@ -197,3 +212,5 @@ t{ This is some text that I put here }t
 q{ This is a qquesiotn {c} Hello o{cat, dog, house as, notebook jf, bot tle, monitor, flag, U בSA}o}q
 }p
 */
+
+// https://i.imgur.com/OAVSJvq.png

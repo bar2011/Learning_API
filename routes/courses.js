@@ -5,6 +5,7 @@ const util = require('util')
 const fs = require('fs')
 const mysql = require('mysql2')
 const http = require('http')
+const axios = require('axios')
 
 const readFile = util.promisify(fs.readFile)
 
@@ -23,17 +24,17 @@ async function connectToMySql() {
         user: username,
         password: password
     });
-    connection.connect(function(err) {
-      if (err) throw err;
-      console.log("Connected to MySQL database");
+    connection.connect(function (err) {
+        if (err) throw err;
+        console.log("Connected to MySQL database");
     });
-    
+
     // Use database sql_learning_api when executing MySQL code
     runSqlCode("USE sql_learning_api")
 }
 
 // Run MySQL code using a promise rather then a nested callback
-function runSqlCode(sql, args=[]) {
+function runSqlCode(sql, args = []) {
     return new Promise((resolve, reject) => {
         connection.query(sql, args, (err, result) => {
             if (err) throw err
@@ -50,6 +51,32 @@ function getRequest(url) {
     })
 }
 
+async function checkImageLink(imageUrl) {
+    if (imageUrl.match(/.png$|.jpg$|.jpeg$/).length <= 0) return 400
+
+    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+    let error = (response.status != 200)
+
+    if (error) return 404
+
+    return 200
+}
+
+async function getImageFromLink(imageUrl) {
+    if (await checkImageLink(imageUrl) != 200) return 400
+
+    const imageName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1)
+
+    // From https://byby.dev/node-download-image#:~:text=This%20is%20a%20common%20task,that%20data%20to%20a%20file.
+    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+
+    fs.writeFile('./public/images/'+imageName, response.data, (err) => {
+        if (err) throw err
+    });
+
+    return 201
+}
+
 // 200 (def): OK 201: Created 204: No Content
 // 400: Bad req 401: Unauthorized 403: Forbidden 404: Not Found 409: Conflict
 // 500: Server err 501: unimplemented
@@ -63,7 +90,7 @@ router.post('/options', async (req, res) => {
 
     // Insert each option into course_options table
     for (let i = 1; i <= req.body.options_list.length; i++) {
-        runSqlCode('INSERT INTO course_options VALUES (?, ?, ?)', [req.body.course_id, req.body.question_id+i, req.body.options_list[i-1]])
+        runSqlCode('INSERT INTO course_options VALUES (?, ?, ?)', [req.body.course_id, req.body.question_id + i, req.body.options_list[i - 1]])
     }
     res.sendStatus(201)
 })
@@ -82,7 +109,7 @@ router.get('/options/:id', async (req, res) => {
 
     // Select options
     let optionsList = await runSqlCode('SELECT * FROM course_options WHERE course_id = ? AND question_id REGEXP ?', [courseId[0], questionId])
-    
+
     if (optionsList.length <= 0) return res.status(404).send(error404)
 
     res.send(optionsList)
@@ -115,7 +142,7 @@ router.get('/answers/:id', async (req, res) => {
 
     // Select answer hash
     let answerHash = await runSqlCode('SELECT * FROM course_answers WHERE course_id = ? AND question_id REGEXP ?', [courseId[0], questionId[0].substring(1)])
-    
+
     if (answerHash.length <= 0) return res.status(404).send(error404)
 
     res.send(answerHash)
@@ -130,7 +157,7 @@ router.post('/answers/:id', async (req, res) => {
 
     // Select answer hash
     let answerHash = await runSqlCode('SELECT * FROM course_answers WHERE course_id = ? AND question_id = ?', [courseId[0], questionId[0].substring(1)])
-    
+
     if (answerHash.length <= 0) return res.status(404).send(false)
 
     try {
@@ -143,6 +170,10 @@ router.post('/answers/:id', async (req, res) => {
     } catch {
         res.sendStatus(500)
     }
+})
+
+router.post('/image', async (req, res) => {
+    return res.sendStatus(await checkImageLink(req.body.url))
 })
 
 router.get('/', async (req, res) => {
@@ -168,7 +199,7 @@ router.get('/:id/progress', async (req, res) => {
     const title = course[0].course_title
     const chapterCount = course[0].course_html.split(',').length
     let chapterText = '<!doctypehtml><html lang=en><meta charset=UTF-8><meta content="width=device-width,initial-scale=1"name=viewport><title>' + title + ' Progress</title><link href=../courses.css rel=stylesheet><script src=../../sketch.js></script><script src=../courseFunctions.js></script><div class=reset-div><button onclick=reset()>Reset</button></div><div class="chapter-div 1"><h1>Chapter 1 - name</h1><img></div>'
-    for (let i=2; i<= chapterCount; i++) {
+    for (let i = 2; i <= chapterCount; i++) {
         chapterText += '<div class="chapter-div ' + i + '"><h1>Chapter ' + i + ' - name</h1></div>'
     }
     res.send(chapterText)
@@ -180,7 +211,7 @@ router.get('/:id/:part', async (req, res) => {
     if (course.length <= 0) return res.status(404).send(error404)
     let partNum = parseInt(req.params.part.slice(0, -1))
     let chapterHTML = "<link href=../courses.css rel=stylesheet><script src=../../sketch.js></script><script src=../courseFunctions.js></script>" +
-                      course[0].course_html.split(',')[partNum-1]
+        course[0].course_html.split(',')[partNum - 1]
     res.send(chapterHTML)
 })
 
@@ -197,7 +228,7 @@ router
 
         // Update course with values
         runSqlCode('UPDATE courses SET course_title = ?, course_description = ?, current_div = ?, current_progress = ?, course_html = ? WHERE course_id = ?',
-                    [req.body.title, req.body.description, req.body.current_div, req.body.progress, req.body.html, req.params.id])
+            [req.body.title, req.body.description, req.body.current_div, req.body.progress, req.body.html, req.params.id])
         res.sendStatus(204)
     })
     .delete(async (req, res) => {
@@ -218,8 +249,8 @@ router.post('/', async (req, res) => {
     if ((await getRequest(`/courses/${req.body.id}`)).statusCode == 200) return res.sendStatus(400)
 
     // Insert a new course into courses table
-    runSqlCode(`INSERT INTO courses (course_title, course_description, course_html) VALUES (?, ?, '${req.body.html}')`, [req.body.title, req.body.description])
+    runSqlCode(`INSERT INTO courses (course_title, course_description, course_image, course_html) VALUES (?, ?, ?, '${req.body.html}')`, [req.body.title, req.body.description, req.body.image])
     res.sendStatus(201)
 })
 
-module.exports = { router, runSqlCode }
+module.exports = { router, runSqlCode, getImageFromLink }
