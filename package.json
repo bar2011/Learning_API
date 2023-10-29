@@ -18,13 +18,13 @@
     "express": "^4.18.2",
     "fs": "^0.0.1-security",
     "fs-js": "^1.0.6",
-    "jQuery": "^1.7.4",
     "jsdom": "^22.1.0",
     "mysql": "^2.18.1",
     "mysql2": "^3.6.1",
     "util": "^0.12.5"
   },
   "devDependencies": {
+    "custom-syntax-highlighter": "^1.0.1",
     "nodemon": "^3.0.1"
   }
 }
