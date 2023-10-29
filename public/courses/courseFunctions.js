@@ -6,10 +6,6 @@ var id = location.href.split('/');
 id = id[id.length-2]
 var course
 
-var divs = document.getElementsByClassName('div');
-var chapters = document.getElementsByClassName('chapter-div');
-var buttons = document.getElementsByClassName('continue');
-
 function showNext() {
     course.showNext()
 }

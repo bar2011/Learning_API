@@ -137,8 +137,8 @@ function createChapter(chapterText, chapterNumber) {
     }
     // Create the finishing section of the chapter
     let chapterFinishingSection = document.createElement('div')
-    chapterFinishingSection.className = 'div ' + sectionNumber++
-    chapterFinishingSection.appendChild($.parseHTML(`<button onclick="course.finishLevel(${chapterNumber})" class="finish continue">Finish</button>`)[0])
+    chapterFinishingSection.className = 'section ' + sectionNumber++
+    chapterFinishingSection.appendChild($.parseHTML(`<button onclick="course.finishLevel(${chapterNumber})" class="finish continue button small-button hover-anim">Finish</button>`)[0])
     chapterHtmlArray.push(chapterFinishingSection)
 
     return chapterHtmlArray
@@ -168,12 +168,11 @@ function createChapterSection(mainDiv, sectionNumber) {
     console.log(mainDiv)
 
     let chapterSection = document.createElement('div')
-    chapterSection.className = 'div ' + sectionNumber++
+    chapterSection.className = 'section ' + sectionNumber++
     chapterSection.appendChild(mainDiv)
 
     // Add button for continuing in the chapter
-    chapterSection.appendChild(document.createElement('br'))
-    chapterSection.appendChild($.parseHTML('<button onclick="showNext()" class="continue">Continue</button>')[0])
+    chapterSection.appendChild($.parseHTML('<button onclick="showNext()" class="continue button small-button hover-anim">Continue</button>')[0])
 
     return chapterSection
 }
@@ -203,7 +202,6 @@ function getQuestionDiv(chapterText, chapterNumber, questionNumber, indexStart) 
     answerText = answerText[0]
 
     question = createQuestionHtml(chapterNumber, questionNumber, questionText, answerText, options)
-    console.log(question)
     return question;
 }
 
@@ -221,17 +219,15 @@ function createQuestionHtml(chapterNumber, questionNumber, questionText, answerT
 
     // Create HTML for each option
     for (let i=1; i<= starterOptions.length; i++) {
-        let currentDiv = document.createElement("div")
-        currentDiv.appendChild(document.createElement("input"))
-        currentDiv.childNodes[0].type = "radio"
-        currentDiv.childNodes[0].id = id+'i'+chapterNumber+'p'+questionNumber+'q'+i+'o'
-        currentDiv.childNodes[0].name = questionText + questionNumber
-        currentDiv.childNodes[0].value = starterOptions[i-1]
-        if (i==1) currentDiv.childNodes[0].checked = true
-        currentDiv.appendChild(document.createElement("label"))
-        currentDiv.childNodes[1].innerHTML = starterOptions[i-1]
-        currentDiv.childNodes[1].htmlFor = id+'i'+chapterNumber+'p'+questionNumber+'q'+i+'o'
-        questionNode.appendChild(currentDiv)
+        let currentOption = document.createElement("label")
+        currentOption.appendChild(document.createElement("input"))
+        currentOption.childNodes[0].type = "radio"
+        currentOption.childNodes[0].id = id+'i'+chapterNumber+'p'+questionNumber+'q'+i+'o'
+        currentOption.childNodes[0].name = questionText + questionNumber
+        if (i==1) currentOption.childNodes[0].checked = true
+        currentOption.appendChild(document.createElement("span"))
+        currentOption.childNodes[1].innerHTML = starterOptions[i-1]
+        questionNode.appendChild(currentOption)
     }
 
     // Send question to server
