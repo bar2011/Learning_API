@@ -1,57 +1,113 @@
-button {
-    border: 2px solid black;
-    border-radius: 5px;
-    background-color: white;
-    padding-top: 4px; padding-bottom: 4px;
-    padding-left: 7px; padding-right: 7px;
+@font-face {
+    font-family: "Roboto";
+    src: url(../images/Roboto-Bold.ttf);
 }
 
-.audio-img {
-    height: 2vh;
-    transform: translate(8px, 4px);
-    margin-right: 8px;
+* {
+    font-family: "Roboto";
 }
 
-.chapter-div {
+.chapter {
     border: 2px solid black;
     border-radius: 10px;
     margin: 2vh;
     height: 10vh;
 }
 
-.chapter-div img {
+.chapter:hover {
+    cursor: pointer;
+}
+
+.chapter img {
     height: 9vh;
     margin-left: 5px;
 }
 
-.chapter-div > h1 {
+.chapter>h1 {
     display: none;
 }
 
-.chapter-div,
-.reset-div,
-#main-input {
+.chapter,
+.reset-button {
     margin-left: 20%;
     margin-right: 20%;
 }
 
-.div {
+.section {
     display: none;
-    margin-left: 35%;
-    margin-right: 35%;
+    margin-left: 25%;
+    margin-right: 25%;
     max-width: 100%;
-    font-family:Arial, Helvetica, sans-serif;
 }
 
-#main-input {
-    width: 60%;
-    height: 80vh;
-    resize: none;
+*,
+*:after,
+*:before {
+    box-sizing: border-box;
 }
 
-#convert-html {
-    margin-left: 45%;
-    margin-right: 45%;
-    width: 10%;
-    height: 5vh;
+body:not(.side) {
+    margin-left: 25%;
+    margin-right: 25%;
+    max-width: 50%;
 }
+
+/* question css */
+
+label {
+    display: flex;
+    cursor: pointer;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 0.375em;
+}
+
+label input {
+    position: absolute;
+    left: -9999px;
+}
+
+label input:checked+span {
+    background-color: #d6d6d6;
+}
+
+label input:checked+span:before {
+    box-shadow: inset 0 0 0 0.4375em;
+}
+
+label span {
+    display: flex;
+    align-items: center;
+    padding: 0.375em 0.75em 0.375em 0.375em;
+    border-radius: 99em;
+    transition: 0.25s ease;
+}
+
+label span:hover {
+    background-color: #d6d6d6;
+}
+
+label span:before {
+    display: flex;
+    flex-shrink: 0;
+    content: "";
+    background-color: #fff;
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 50%;
+    margin-right: 0.375em;
+    transition: 0.25s ease;
+    box-shadow: inset 0 0 0 0.125em;
+}
+
+fieldset {
+    border: 2px solid var(--background-color);
+    border-top: 60px solid var(--background-color);
+    border-radius: 20px;
+    background-color: var(--background-color);
+
+    --background-color: #e6e6e6
+}
+
+/* end of question css */

@@ -1,0 +1,45 @@
+<html>
+
+<head>
+    <link href="../courses.css" rel="stylesheet">
+    <link href="../../main.css" rel="stylesheet">
+    <script src="../../sketch.js"></script>
+    <script src="../courseFunctions.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+</head>
+
+<body>
+    <div>
+        <div class="section 1" style="display: block;">
+            <div>This is some text that I put here</div>
+            <button onclick="showNext()" class="continue button small-button hover-anim">Continue</button>
+        </div>
+        <div class="section 2" style="display: block;">
+            <fieldset id="1i1p1q">
+                <legend>This is a qquesiotn</legend>
+                <label>
+                    <input type="radio" id="1i1p1q1o" name="This is a qquesiotn1" checked />
+                    <span>house as</span>
+                </label>
+                <label>
+                    <input type="radio" id="1i1p1q2o" name="This is a qquesiotn1" />
+                    <span>Hello</span>
+                </label>
+                <label>
+                    <input type="radio" id="1i1p1q3o" name="This is a qquesiotn1" />
+                    <span>dog</span>
+                </label>
+                <label>
+                    <input type="radio" id="1i1p1q4o" name="This is a qquesiotn1" checked />
+                    <span>U בSA</span>
+                </label>
+            </fieldset>
+            <button onclick="showNext()" class="continue button small-button hover-anim">Continue</button>
+        </div>
+        <div class="section 3" style="display: block;">
+            <button onclick="course.finishLevel(1)" class="finish continue button small-button hover-anim">Finish</button>
+        </div>
+    </div>
+</body>
+
+</html>
