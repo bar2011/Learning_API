@@ -1,12 +1,53 @@
 let inputDiv;
-let inputtedText;
+let inputtedText = "";
 let id;
 let title;
 let description;
 
-$(document).ready(function() {
-    inputDiv = document.getElementById("main-input");
-})
+Prism.languages["course"] = {
+    'keyword': /[qtop]{\s|\s}[qtop]|\s{c}\s/,
+    'operator': /,\s/,
+    'string': /["'](?:\\.|[^\\"'\r\n])*["']/
+}
+
+// code taken from https://codepen.io/WebCoder49/pen/dyNyraq
+
+function update(text) {
+    inputtedText = text
+    let result_element = document.querySelector("#highlighting-content");
+    // Handle final newlines (see article)
+    if(text[text.length-1] == "\n") {
+        text += " ";
+    }
+    // Update code
+    result_element.innerHTML = text.replace(new RegExp("&", "g"), "&amp;").replace(new RegExp("<", "g"), "&lt;"); /* Global RegExp */
+    // Syntax Highlight
+    Prism.highlightElement(result_element);
+}
+  
+function sync_scroll(element) {
+    /* Scroll result to scroll coords of event - sync with textarea */
+    let result_element = document.querySelector("#highlighting");
+    // Get and set x and y
+    result_element.scrollTop = element.scrollTop;
+    result_element.scrollLeft = element.scrollLeft;
+}
+  
+function check_tab(element, event) {
+    let code = element.value;
+    if(event.key == "Tab") {
+        /* Tab key pressed */
+        event.preventDefault(); // stop normal
+        let before_tab = code.slice(0, element.selectionStart); // text before tab
+        let after_tab = code.slice(element.selectionEnd, element.value.length); // text after tab
+        let cursor_pos = element.selectionStart + 1; // where cursor moves after tab - moving forward by 1 char to after tab
+        element.value = before_tab + "\t" + after_tab; // add tab char
+        // move cursor
+        element.selectionStart = cursor_pos;
+        element.selectionEnd = cursor_pos;
+        update(element.value); // Update text to include indent
+    }
+}
 
 async function convertTextToHTML() {
     // Get course ID by checking the number of courses (i.e. the ID of the final course) and adding 1
@@ -14,7 +55,6 @@ async function convertTextToHTML() {
         id = data.length+1
     })
 
-    inputtedText = inputDiv.value;
     let chaptersHtmlArray = []
 
     title = prompt("Before creating the course, please choose a title for the course.\nThe title needs to be at least 3 characters long and at most 30 characters. Plus it can not contain any special characters in it")
@@ -23,8 +63,8 @@ async function convertTextToHTML() {
     if (confirm("Do you also want to create a description for this course?"))
     {
         // Same thing with description
-        description = prompt("OK. Your description also can't contain special characters and needs to be at least 10 characters")
-        if (!/^[\w\d\s]+$/.test(description) || description.length < 10 || description.length > 1000) return alert("The description you entered is invalid")
+        description = prompt("OK. Your description also can't contain special characters and needs to be between 5 and 60")
+        if (!/^[\w\d\s]+$/.test(description) || description.length < 5 || description.length > 60) return alert("The description you entered is invalid")
     }
     else description = null
     let imageUrl = prompt("Last thing, enter a URL for your course's image")
@@ -87,6 +127,7 @@ function createChapter(chapterText, chapterNumber) {
                 case 'q': {
                     // Create question chapter section
                     let questionDiv = getQuestionDiv(chapterText, chapterNumber, questionNumber++, j+1)
+                    console.log(questionDiv)
                     let chapterSection = createChapterSection(questionDiv, sectionNumber++)
                     chapterHtmlArray.push(chapterSection)
                     break;
@@ -117,13 +158,15 @@ function sendCourseToServer(chapterHtmlArray, imageUrl) {
             title: title,
             description: description,
             image: imageUrl,
-            html: chapterStringArray.join()
+            html: chapterStringArray
         }
     })
 }
 
 // `mainDiv` is the text or question div
 function createChapterSection(mainDiv, sectionNumber) {
+    console.log(mainDiv)
+
     let chapterSection = document.createElement('div')
     chapterSection.className = 'div ' + sectionNumber++
     chapterSection.appendChild(mainDiv)
@@ -137,19 +180,30 @@ function createChapterSection(mainDiv, sectionNumber) {
 
 function createTextDiv(chapterText, indexStart) {
     let textDiv = document.createElement('div');
-    // Get the text content from `chapterText`
-    let text = chapterText.substring(indexStart, chapterText.indexOf('}t', indexStart))
+    // Get the text content from `chapterText` by finding the first "string" in the text following the t{ declaration
+    let text = chapterText.substring(indexStart).match(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/)
+    if (text == null) return
+    text = text[0]
+
     textDiv.textContent = text;
     return textDiv;
 }
 
 // Using chapterNumber and questionNumber only for assigning id to elements and for database
 function getQuestionDiv(chapterText, chapterNumber, questionNumber, indexStart) {
-    // Extracr question, answer and options from `chapterText`
-    let questionText = chapterText.substring(indexStart, chapterText.indexOf('{c}', indexStart))
-    let answerText = chapterText.substring(chapterText.indexOf('{c}', indexStart)+3, chapterText.indexOf('o{', indexStart))
-    let options = chapterText.substring(chapterText.indexOf('o{', indexStart)+2, chapterText.indexOf('}o', indexStart)).split(', ')
+    // Extract question, answer and options from `chapterText` using regexp
+    let questionText = chapterText.substring(indexStart).match(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/)
+    let answerText = chapterText.substring(chapterText.indexOf('{c}', indexStart)).match(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/)
+    let options = [...chapterText.substring(chapterText.indexOf('o{ ', indexStart), chapterText.indexOf(' }o', indexStart)).matchAll(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/g)]
+    if (questionText == null || answerText == null || options == null) return null;
+    options = options.map((option) => {
+        return option[0]
+    })
+    questionText = questionText[0]
+    answerText = answerText[0]
+
     question = createQuestionHtml(chapterNumber, questionNumber, questionText, answerText, options)
+    console.log(question)
     return question;
 }
 
@@ -208,9 +262,18 @@ function shuffle(array) {
 }
 /*
 p{
-t{ This is some text that I put here }t
-q{ This is a qquesiotn {c} Hello o{cat, dog, house as, notebook jf, bot tle, monitor, flag, U בSA}o}q
+	t{ 'This is some text that I put here' }t
+	q{ 'This is a qquesiotn' {c} 'Hello' 
+		o{ 'cat',
+		   'dog', 
+		   'house as', 
+		   'notebook jf', 
+		   'bot tle', 
+		   'monitor', 
+		   'flag', 
+		   'U בSA' }o 
+	}q
 }p
 */
 
-// https://i.imgur.com/OAVSJvq.png
+// https://ds055uzetaobb.cloudfront.net/brioche/chapter/Introduction_to_Algebra-BDG7jd.png
