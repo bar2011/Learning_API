@@ -54,7 +54,13 @@ function getRequest(url) {
 async function checkImageLink(imageUrl) {
     if (imageUrl.match(/.png$|.jpg$|.jpeg$/) == null) return 400
 
-    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+    var response
+
+    try {
+        response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+    } catch {
+        return 404
+    }
     let error = (response.status != 200)
 
     if (error) return 404
@@ -70,7 +76,7 @@ async function getImageFromLink(imageUrl) {
     // From https://byby.dev/node-download-image#:~:text=This%20is%20a%20common%20task,that%20data%20to%20a%20file.
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
 
-    fs.writeFile('./public/images/'+imageName, response.data, (err) => {
+    fs.writeFile('./public/images/' + imageName, response.data, (err) => {
         if (err) throw err
     });
 
@@ -247,11 +253,11 @@ router
 router.post('/', async (req, res) => {
     // If course with same ID exist than the server can't create another course with the same ID
     if ((await getRequest(`/courses/${req.body.id}`)).statusCode == 200) return res.sendStatus(400)
-    
+
     // Get rid of errors in html
     let html = req.body.html.join()
     // html = mysql.escape(html)
-    html = html.substring(0, html.length-1)
+    html = html.substring(0, html.length - 1)
 
     // Insert a new course into courses table
     runSqlCode(`INSERT INTO courses (course_title, course_description, course_image, course_html) VALUES (?, ?, ?, ?)`, [req.body.title, req.body.description, req.body.image, html])

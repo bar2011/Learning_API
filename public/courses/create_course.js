@@ -5,8 +5,8 @@ let title;
 let description;
 
 Prism.languages["course"] = {
-    'keyword': /[qtop]{\s|\s}[qtop]|\s{c}\s/,
-    'operator': /,\s/,
+    'keyword': /([qtopd]|cd){\s|\s}([qtopd]|cd)|\s{c}\s/,
+    'property': /,\s/,
     'string': /["'](?:\\.|[^\\"'\r\n])*["']/
 }
 
@@ -16,7 +16,7 @@ function update(text) {
     inputtedText = text
     let result_element = document.querySelector("#highlighting-content");
     // Handle final newlines (see article)
-    if(text[text.length-1] == "\n") {
+    if (text[text.length - 1] == "\n") {
         text += " ";
     }
     // Update code
@@ -24,7 +24,7 @@ function update(text) {
     // Syntax Highlight
     Prism.highlightElement(result_element);
 }
-  
+
 function sync_scroll(element) {
     /* Scroll result to scroll coords of event - sync with textarea */
     let result_element = document.querySelector("#highlighting");
@@ -32,10 +32,10 @@ function sync_scroll(element) {
     result_element.scrollTop = element.scrollTop;
     result_element.scrollLeft = element.scrollLeft;
 }
-  
+
 function check_tab(element, event) {
     let code = element.value;
-    if(event.key == "Tab") {
+    if (event.key == "Tab") {
         /* Tab key pressed */
         event.preventDefault(); // stop normal
         let before_tab = code.slice(0, element.selectionStart); // text before tab
@@ -51,54 +51,59 @@ function check_tab(element, event) {
 
 async function convertTextToHTML() {
     // Get course ID by checking the number of courses (i.e. the ID of the final course) and adding 1
-    await $.get("/courses", function(data, status){
-        id = data.length+1
+    await $.get("/courses", function (data, status) {
+        id = data.length + 1
     })
 
     let chaptersHtmlArray = []
 
-    title = prompt("Before creating the course, please choose a title for the course.\nThe title needs to be at least 3 characters long and at most 30 characters. Plus it can not contain any special characters in it")
-    // Check if title meets requirements
-    if (!/^[\w\d\s]+$/.test(title) || title.length < 3 || title.length > 30) return alert("The title you entered is invalid")
-    if (confirm("Do you also want to create a description for this course?"))
-    {
-        // Same thing with description
-        description = prompt("OK. Your description also can't contain special characters and needs to be between 5 and 60")
-        if (!/^[\w\d\s]+$/.test(description) || description.length < 5 || description.length > 60) return alert("The description you entered is invalid")
-    }
+    // when showing error link to something that looks like documentation but less good
+    let courseData = inputtedText.match(/cd{\s.+/)
+    if (courseData.length <= 0) return swal("You need to enter course data", "You can use it like so:\ncd{ 'course name', 'course description{optional}', 'course image url'", "error");
+    courseData = courseData[0].substring(0, courseData[0].match(/\s}cd/).index)
+    courseData = [...courseData.matchAll(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/g)]
+    title = courseData[0][0]
+    if (!/^[\w\d\s]+$/.test(title) || title.length < 3 || title.length > 30)
+        return swal("The title you entered is INVALID", "Your title needs to be between 3 and 30 characters.\nPlus it can't contain any special characters in it", "error");
+    description = courseData[1][0]
+    if ((!/^[\w\d\s]+$/.test(description) || description.length < 15 || description.length > 250) && description.length > 0)
+        return swal("The description you entered is INVALID", "Your description needs to be between 15 and 250 characters.\nPlus it can't contain any special characters in it", "error");
     else description = null
-    let imageUrl = prompt("Last thing, enter a URL for your course's image")
-    $.ajax({
-        type: "POST",
-        url: "/courses/image",
-        data: {
-            url: imageUrl
-        },
-        statusCode: {
-            404: function() {
-              imageUrl = false
+    let imageUrl = courseData[2][0]
+    try {
+        await $.ajax({
+            type: "POST",
+            url: "/courses/image",
+            data: {
+                url: imageUrl
+            },
+            statusCode: {
+                404: function () {
+                    imageUrl = false
+                }
             }
-          }
-    })
-    if (!imageUrl) return alert("The URL you entered was invalid");
+        })
+    } catch (error) {}
+    
+    if (!imageUrl) return swal("The URL you entered was INVALID", "", "error");
 
     // Add every chapters text to `chapters` array
     // For every chapter, append a div element to `chaptersHtmlArray`
     // to build on top of that div the actual chapter HTML
     let chapters = []
     let lastChapter = 0
-    for (let i=0; i< inputtedText.length; i++) {
+    for (let i = 0; i < inputtedText.length; i++) {
         // Find the end of a chapter and use `lastChapter` variable to get start of the chapter
-        if (inputtedText.substring(i, i+2) == "}p") {
-            chapters.push(inputtedText.substring(lastChapter, i+1))
-            lastChapter = i+2
-            
+        if (inputtedText.substring(i, i + 2) == "}p") {
+            chapters.push(inputtedText.substring(lastChapter, i + 1))
+            lastChapter = i + 2
+
             chaptersHtmlArray.push(document.createElement("div"))
         }
     }
-    
-    for (let i=0; i< chapters.length; i++) {
-        let chapter = createChapter(chapters[i], i+1)
+
+    for (let i = 0; i < chapters.length; i++) {
+        let chapter = createChapter(chapters[i], i + 1)
         chapter.forEach(chapterSection => {
             chaptersHtmlArray[i].appendChild(chapterSection)
         })
@@ -113,21 +118,20 @@ function createChapter(chapterText, chapterNumber) {
     let questionNumber = 1;
     let sectionNumber = 1;
     // Loop over every character in the chapter
-    for (let j= 0; j < chapterText.length; j++) {
+    for (let j = 0; j < chapterText.length; j++) {
         // Check for an expression start and then check for the type of expression
-        if (inputtedText.substring(j, j+2) == '{ ') {
-            switch (inputtedText.charAt(j-1).toLowerCase()) {
+        if (inputtedText.substring(j, j + 2) == '{ ') {
+            switch (inputtedText.charAt(j - 1).toLowerCase()) {
                 case 't': {
                     // Create text chapter section
-                    let textDiv = createTextDiv(chapterText, j+1)
+                    let textDiv = createTextDiv(chapterText, j + 1)
                     let chapterSection = createChapterSection(textDiv, sectionNumber++)
                     chapterHtmlArray.push(chapterSection)
                     break;
                 }
                 case 'q': {
                     // Create question chapter section
-                    let questionDiv = getQuestionDiv(chapterText, chapterNumber, questionNumber++, j+1)
-                    console.log(questionDiv)
+                    let questionDiv = getQuestionDiv(chapterText, chapterNumber, questionNumber++, j + 1)
                     let chapterSection = createChapterSection(questionDiv, sectionNumber++)
                     chapterHtmlArray.push(chapterSection)
                     break;
@@ -147,7 +151,7 @@ function createChapter(chapterText, chapterNumber) {
 function sendCourseToServer(chapterHtmlArray, imageUrl) {
     let chapterStringArray = []
     // Add actual text instead of elements to `chapterStringArray`
-    for (let i=0; i< chapterHtmlArray.length; i++) {
+    for (let i = 0; i < chapterHtmlArray.length; i++) {
         chapterStringArray.push(chapterHtmlArray[i].outerHTML)
     }
     // Add course to server
@@ -165,8 +169,6 @@ function sendCourseToServer(chapterHtmlArray, imageUrl) {
 
 // `mainDiv` is the text or question div
 function createChapterSection(mainDiv, sectionNumber) {
-    console.log(mainDiv)
-
     let chapterSection = document.createElement('div')
     chapterSection.className = 'section ' + sectionNumber++
     chapterSection.appendChild(mainDiv)
@@ -208,7 +210,7 @@ function getQuestionDiv(chapterText, chapterNumber, questionNumber, indexStart) 
 function createQuestionHtml(chapterNumber, questionNumber, questionText, answerText, options) {
     // Create parent question element
     let questionNode = document.createElement("fieldset");
-    questionNode.id = id+'i'+chapterNumber+'p'+questionNumber+'q'
+    questionNode.id = id + 'i' + chapterNumber + 'p' + questionNumber + 'q'
     questionNode.appendChild(document.createElement("legend"));
     questionNode.childNodes[0].innerHTML = questionText;
 
@@ -218,57 +220,59 @@ function createQuestionHtml(chapterNumber, questionNumber, questionText, answerT
     starterOptions = shuffle(starterOptions)
 
     // Create HTML for each option
-    for (let i=1; i<= starterOptions.length; i++) {
+    for (let i = 1; i <= starterOptions.length; i++) {
         let currentOption = document.createElement("label")
         currentOption.appendChild(document.createElement("input"))
         currentOption.childNodes[0].type = "radio"
-        currentOption.childNodes[0].id = id+'i'+chapterNumber+'p'+questionNumber+'q'+i+'o'
+        currentOption.childNodes[0].id = id + 'i' + chapterNumber + 'p' + questionNumber + 'q' + i + 'o'
         currentOption.childNodes[0].name = questionText + questionNumber
-        if (i==1) currentOption.childNodes[0].checked = true
+        if (i == 1) currentOption.childNodes[0].checked = true
         currentOption.appendChild(document.createElement("span"))
-        currentOption.childNodes[1].innerHTML = starterOptions[i-1]
+        currentOption.childNodes[1].innerHTML = starterOptions[i - 1]
         questionNode.appendChild(currentOption)
     }
 
     // Send question to server
     options.push(answerText)
-    $.post('/courses/options/', {course_id: id, question_id: `${chapterNumber}p${questionNumber}q`, options_list: shuffle(options)})
-    $.post('/courses/answers/', {course_id: id, question_id: `${chapterNumber}p${questionNumber}q`, answer: answerText})
+    $.post('/courses/options/', { course_id: id, question_id: `${chapterNumber}p${questionNumber}q`, options_list: shuffle(options) })
+    $.post('/courses/answers/', { course_id: id, question_id: `${chapterNumber}p${questionNumber}q`, answer: answerText })
 
     return questionNode;
 }
 
 function shuffle(array) {
     // Shuffles an array. from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-    let currentIndex = array.length,  randomIndex;
-  
+    let currentIndex = array.length, randomIndex;
+
     // While there remain elements to shuffle.
     while (currentIndex != 0) {
-  
-      // Pick a remaining element.
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex--;
-  
-      // And swap it with the current element.
-      [array[currentIndex], array[randomIndex]] = [
-        array[randomIndex], array[currentIndex]];
+
+        // Pick a remaining element.
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        // And swap it with the current element.
+        [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
     }
-  
+
     return array;
 }
 /*
+cd{ 'Course name', 'Course Description', 'https://courseimage.png' }cd
 p{
-	t{ 'This is some text that I put here' }t
-	q{ 'This is a qquesiotn' {c} 'Hello' 
-		o{ 'cat',
-		   'dog', 
-		   'house as', 
-		   'notebook jf', 
-		   'bot tle', 
-		   'monitor', 
-		   'flag', 
-		   'U בSA' }o 
-	}q
+    d{ 'Name Of Chapter', 'https://chapterimage.png' }d
+    t{ 'This is some text that I put here' }t
+    q{ 'This is a qquesiotn' {c} 'Hello'
+        o{ 'cat',
+           'dog',
+           'house as',
+           'notebook jf',
+           'bot tle',
+           'monitor',
+           'flag',
+           'U בSA' }o
+    }q
 }p
 */
 
