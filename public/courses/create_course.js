@@ -1,3 +1,5 @@
+const { default: swal } = require("sweetalert");
+
 let inputDiv;
 let inputtedText = "";
 let id;
@@ -163,6 +165,9 @@ function sendCourseToServer(chapterHtmlArray, imageUrl) {
             description: description,
             image: imageUrl,
             html: chapterStringArray
+        },
+        success: function(data) {
+            swal("Course Created Successfully", "", "success")
         }
     })
 }
