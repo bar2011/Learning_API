@@ -52,7 +52,7 @@ function getRequest(url) {
 }
 
 async function checkImageLink(imageUrl) {
-    if (imageUrl.match(/.png$|.jpg$|.jpeg$/).length <= 0) return 400
+    if (imageUrl.match(/.png$|.jpg$|.jpeg$/) == null) return 400
 
     const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     let error = (response.status != 200)
@@ -247,9 +247,14 @@ router
 router.post('/', async (req, res) => {
     // If course with same ID exist than the server can't create another course with the same ID
     if ((await getRequest(`/courses/${req.body.id}`)).statusCode == 200) return res.sendStatus(400)
+    
+    // Get rid of errors in html
+    let html = req.body.html.join()
+    // html = mysql.escape(html)
+    html = html.substring(0, html.length-1)
 
     // Insert a new course into courses table
-    runSqlCode(`INSERT INTO courses (course_title, course_description, course_image, course_html) VALUES (?, ?, ?, '${req.body.html}')`, [req.body.title, req.body.description, req.body.image])
+    runSqlCode(`INSERT INTO courses (course_title, course_description, course_image, course_html) VALUES (?, ?, ?, ?)`, [req.body.title, req.body.description, req.body.image, html])
     res.sendStatus(201)
 })
 

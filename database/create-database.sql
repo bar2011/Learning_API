@@ -5,7 +5,7 @@ USE `sql_learning_api`;
 CREATE TABLE `courses` (
 	`course_id` INT NOT NULL AUTO_INCREMENT,
 	`course_title` VARCHAR(32) NOT NULL,
-    `course_description` VARCHAR(1024) DEFAULT NULL,
+    `course_description` VARCHAR(64) DEFAULT NULL,
     `course_image` VARCHAR(256) NOT NULL,
     `current_div` SMALLINT UNSIGNED DEFAULT 1 NOT NULL,
     `current_progress` MEDIUMINT UNSIGNED DEFAULT 1 NOT NULL,
