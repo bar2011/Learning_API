@@ -92,7 +92,7 @@ const error404 = '<!doctypehtml><title>Page not found</title><meta charset=utf-8
 
 router.post('/options', async (req, res) => {
     // If options with same course and question ID exist than the server can't create another set of options with the same ID
-    if ((await getRequest(`/courses/options/${req.body.course_id},${req.body.chapterNumber}p${req.body.question_id}`)).statusCode == 200) return res.sendStatus(400)
+    if ((await getRequest(`/courses/options/${req.body.course_id}?chapterNumber=${req.body.chapterNumber}&questionId=${req.body.question_id}`)).statusCode == 200) return res.sendStatus(400)
 
     // Insert each option into course_options table
     for (let i = 1; i <= req.body.options_list.length; i++) {
@@ -101,17 +101,15 @@ router.post('/options', async (req, res) => {
     res.sendStatus(201)
 })
 router.get('/options/:id', async (req, res) => {
-    // Extract course and question id from id given in parameters using regex
-    let courseId = req.params.id.match(/^\d+/)
-    let questionId = req.params.id.match(/,.+$/)
+    // Extract course and question id from id given in parameters and query
+    let courseId = req.params.id
+    let chapterNumber = req.query.chapterNumber
+    let questionId = req.query.questionId
 
-    if (courseId == null || questionId == null) return res.sendStatus(400)
-
-    // Get the actual question ID ([partNum]p[questionNum]q) and put it in regex format
-    questionId = '^' + questionId[0].substring(1)
+    if (courseId == null || chapterNumber == null || questionId == null) return res.sendStatus(400)
 
     // Select options
-    let optionsList = await runSqlCode('SELECT * FROM course_options WHERE course_id = ? AND question_id REGEXP ?', [courseId[0], questionId])
+    let optionsList = await runSqlCode('SELECT * FROM course_options WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?', [courseId, chapterNumber, '^'+questionId])
 
     if (optionsList.length <= 0) return res.status(404).send(error404)
 
@@ -120,7 +118,7 @@ router.get('/options/:id', async (req, res) => {
 
 router.post('/answers', async (req, res) => {
     // If answer hash with same course and question ID exist than the server can't create another answer with the same ID
-    if ((await getRequest(`/courses/answers/${req.body.course_id},${req.body.chapterNumber}p${req.body.question_id}`)).statusCode == 200) return res.sendStatus(400)
+    if ((await getRequest(`/courses/answers/${req.body.course_id}?chapterNumber=${req.body.chapterNumber}&questionId=${req.body.question_id}`)).statusCode == 200) return res.sendStatus(400)
 
     try {
         // Hash answer gave by client
@@ -133,14 +131,15 @@ router.post('/answers', async (req, res) => {
 })
 
 router.get('/answers/:id', async (req, res) => {
-    // Extract course and question id from id given in parameters using regex
-    let courseId = req.params.id.match(/^\d+/)
-    let questionId = req.params.id.match(/,.+$/)
+    // Extract course and question id from id given in parameters and in query
+    let courseId = req.params.id
+    let chapterNumber = req.query.chapterNumber
+    let questionId = req.query.questionId
 
-    if (courseId == null || questionId == null) return res.sendStatus(400)
+    if (courseId == null || chapterNumber == null || questionId == null) return res.sendStatus(400)
 
     // Select answer hash
-    let answerHash = await runSqlCode('SELECT * FROM course_answers WHERE course_id = ? AND question_id REGEXP ?', [courseId[0], questionId[0].substring(1)])
+    let answerHash = await runSqlCode('SELECT * FROM course_answers WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?', [courseId, chapterNumber, '^'+questionId])
 
     if (answerHash.length <= 0) return res.status(404).send(error404)
 
@@ -148,14 +147,15 @@ router.get('/answers/:id', async (req, res) => {
 })
 
 router.post('/answers/:id', async (req, res) => {
-    // Extract course and question id from id given in parameters using regex
-    let courseId = req.params.id.match(/^\d+/)
-    let questionId = req.params.id.match(/,.+$/)
+    // Extract course and question id from id given in parameters and in query
+    let courseId = req.params.id
+    let chapterNumber = req.query.chapterNumber
+    let questionId = req.query.questionId
 
-    if (courseId == null || questionId == null) return res.sendStatus(400)
+    if (courseId == null || chapterNumber == null || questionId == null) return res.sendStatus(400)
 
     // Select answer hash
-    let answerHash = await runSqlCode('SELECT * FROM course_answers WHERE course_id = ? AND question_id = ?', [courseId[0], questionId[0].substring(1)])
+    let answerHash = await runSqlCode('SELECT * FROM course_answers WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?', [courseId, chapterNumber, '^'+questionId])
 
     if (answerHash.length <= 0) return res.status(404).send(false)
 
@@ -188,26 +188,33 @@ router.get('/:id/outro', async (req, res) => {
 })
 
 router.get('/:id/progress', async (req, res) => {
-    const course = await runSqlCode('SELECT course_title, course_html FROM courses WHERE course_id = ?', [req.params.id])
-    if (course.length <= 0) return res.status(404).send(error404)
+    let courseTitle = await runSqlCode('SELECT course_title FROM courses WHERE course_id = ?', [req.params.id])
+    const chapters = await runSqlCode('SELECT chapter_title FROM course_chapters WHERE course_id = ?', [req.params.id])
+    if (courseTitle.length <= 0 || chapters.length <= 0) return res.status(404).send(error404)
 
-    const title = course[0].course_title
-    const chapterCount = course[0].course_html.split(',').length
-    let chapterText = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width,initial-scale=1" name="viewport"><title>' + title + ' Progress</title><link href="../courses.css" rel="stylesheet"><link href="../../main.css" rel="stylesheet"><script src="../../sketch.js"></script><script src="../courseFunctions.js"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script></head><body><div class="reset-button"><button class="button small-button hover-anim" onclick="reset()">Reset</button></div><div class="chapter 1"><h1 style="display:block">Chapter 1 - name</h1><img></div>'
-    for (let i = 2; i <= chapterCount; i++) {
-        chapterText += '<div class="chapter ' + i + '"><h1>Chapter ' + i + ' - name</h1></div>'
+    courseTitle = courseTitle[0].course_title
+    const chapterCount = chapters.length
+    let chapterText = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width,initial-scale=1" name="viewport"><title>' + courseTitle + ' Progress</title><link href="../courses.css" rel="stylesheet"><link href="../../main.css" rel="stylesheet"><script src="../../sketch.js"></script><script src="../courseFunctions.js"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script></head><body><div class="reset-button"><button class="button small-button hover-anim" onclick="reset()">Reset</button></div>'
+    for (let i = 1; i <= chapterCount; i++) {
+        chapterText += '<div class="chapter ' + i + '"><h1>Chapter ' + i + ` - ${chapters[i-1].chapter_title}</h1></div>`
     }
     res.send(chapterText)
 })
 
 router.get('/:id/:part', async (req, res) => {
     if (!req.params.part.endsWith('p')) return res.status(404).send(error404)
-    const course = await runSqlCode('SELECT course_html FROM courses WHERE course_id = ?', [req.params.id])
-    if (course.length <= 0) return res.status(404).send(error404)
-    let partNum = parseInt(req.params.part.slice(0, -1))
+    const html = await runSqlCode('SELECT chapter_html FROM course_chapters WHERE course_id = ? AND chapter_number = ?', [req.params.id, req.params.part.slice(0, -1)])
+    if (html.length <= 0) return res.status(404).send(error404)
+
     let chapterHTML = '<link href="../courses.css" rel="stylesheet"><link href="../../main.css" rel="stylesheet"><script src="../../sketch.js"></script><script src="../courseFunctions.js"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>' +
-        course[0].course_html.split(',')[partNum - 1]
+        html[0].chapter_html
     res.send(chapterHTML)
+})
+
+router.get('/id', async (req, res) => {
+    const courses = await runSqlCode('SELECT course_id FROM courses')
+    if (courses.length <=0) return res.send(1+'').status(200)
+    res.send(courses.length+1+'').status(200)
 })
 
 router
@@ -222,8 +229,8 @@ router
         if ((await getRequest(`/courses/${req.params.id}`)).statusCode == 404) return res.status(404).send(error404)
 
         // Update course with values
-        runSqlCode('UPDATE courses SET course_title = ?, course_description = ?, current_div = ?, current_progress = ?, course_html = ? WHERE course_id = ?',
-            [req.body.title, req.body.description, req.body.current_div, req.body.progress, req.body.html, req.params.id])
+        runSqlCode('UPDATE courses SET course_title = ?, course_description = ?, current_chapter = ? WHERE course_id = ?',
+            [req.body.title, req.body.description, req.body.progress, req.params.id])
         res.sendStatus(204)
     })
     .delete(async (req, res) => {
@@ -233,6 +240,7 @@ router
         // Delete course from main courses table
         runSqlCode('DELETE FROM courses WHERE course_id = ?', [req.params.id])
         // Delete course from other tables
+        runSqlCode('DELETE FROM course_chapters WHERE course_id = ?', [req.params.id])
         runSqlCode('DELETE FROM course_answers WHERE course_id = ?', [req.params.id])
         runSqlCode('DELETE FROM course_options WHERE course_id = ?', [req.params.id])
 

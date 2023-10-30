@@ -49,10 +49,14 @@ function check_tab(element, event) {
     }
 }
 
-async function convertTextToHTML() {
-    // Get course ID by checking the number of courses (i.e. the ID of the final course) and adding 1
-    await $.get("/courses", function (data, status) {
-        id = data.length + 1
+function convertTextToHTML() {
+    $.ajax({
+        type: "GET",
+        url: "/courses/id/",
+        async: false,
+        success: function(data) {
+            id = parseInt(data)
+        }
     })
 
     // when showing error link to something that looks like documentation but less good
@@ -72,12 +76,12 @@ async function convertTextToHTML() {
     else description = null
 
     let imageUrl = courseData[2][0]
-    imageUrl = await checkImage(imageUrl)
+    imageUrl = checkImage(imageUrl)
     if (!imageUrl) return swal("The course image URL you entered was INVALID", "", "error");
 
     // Add every chapters text to `chapters` array
     let chaptersText = []
-    let lastChapter = inputtedText.match(/\s}cd/).index+3
+    let lastChapter = inputtedText.match(/\s}cd/).index + 3
     for (let i = 0; i < inputtedText.length; i++) {
         // Find the end of a chapter and use `lastChapter` variable to get start of the chapter
         if (inputtedText.substring(i, i + 2) == "}p") {
@@ -85,11 +89,11 @@ async function convertTextToHTML() {
             lastChapter = i + 2
         }
     }
-    
+
     let chapterObjects = []
 
     for (let i = 0; i < chaptersText.length; i++) {
-        let chapterObject = await createChapter(chaptersText[i], i + 1)
+        let chapterObject = createChapter(chaptersText[i], i + 1)
         if (chapterObject == null) return null;
         chapterObjects.push(chapterObject)
     }
@@ -97,11 +101,12 @@ async function convertTextToHTML() {
     sendCourseToServer(chapterObjects, imageUrl)
 }
 
-async function checkImage(imageUrl) {
+function checkImage(imageUrl) {
     try {
-        await $.ajax({
+        $.ajax({
             type: "POST",
             url: "/courses/image",
+            async: false,
             data: {
                 url: imageUrl
             },
@@ -116,7 +121,7 @@ async function checkImage(imageUrl) {
     return imageUrl
 }
 
-async function createChapter(chapterText, chapterNumber) {
+function createChapter(chapterText, chapterNumber) {
     let chapterObject = {
         chapterNumber: chapterNumber,
         title: null,
@@ -126,7 +131,7 @@ async function createChapter(chapterText, chapterNumber) {
 
     let chapterData = chapterText.match(/d{\s.+/)
 
-    if (chapterData.length <= 0) {
+    if (chapterData == null) {
         swal(`You need to enter chapter data for chapter ${chapterNumber}`, "You can use it like so:\nd{ 'chapter name', 'chapter image url' }d", "error")
         return null;
     }
@@ -140,49 +145,60 @@ async function createChapter(chapterText, chapterNumber) {
     }
 
     chapterObject.image = chapterData[1][0]
-    chapterObject.image = await checkImage(chapterObject.image)
+    chapterObject.image = checkImage(chapterObject.image)
     if (!chapterObject.image) {
         swal(`The image URL you entered in chapter ${chapterNumber} was INVALID`, "", "error");
         return null;
     }
-    
+
     chapterObject.html = document.createElement("div");
 
     let questionNumber = 1;
-    let sectionNumber = 1;
-    // Loop over every character in the chapter
-    for (let j = 0; j < chapterText.length; j++) {
-        // Check for an expression start and then check for the type of expression
-        if (inputtedText.substring(j, j + 2) == '{ ') {
-            switch (inputtedText.charAt(j - 1).toLowerCase()) {
-                case 't': {
-                    // Create text chapter section
-                    chapterText = chapterText.substring(j)
-                    let textDiv = createTextDiv(chapterText)
-                    let chapterSection = createChapterSection(textDiv, sectionNumber++)
-                    chapterObject.html.appendChild(chapterSection)
-                    break;
-                }
-                case 'q': {
-                    // Create question chapter section
-                    chapterText = chapterText.substring(j)
-                    let questionDiv = getQuestionDiv(chapterText, chapterNumber, questionNumber++)
-                    let chapterSection = createChapterSection(questionDiv, sectionNumber++)
-                    chapterObject.html.appendChild(chapterSection)
-                    break;
-                }
-            }
-        }
+
+    // Get all the sections from text using prefex
+    let sectionsText = [...chapterText.matchAll(/([tq]){\s[\s\S]*?\s}\1/g)]
+
+    if (sectionsText.length <= 0) {
+        swal("You need at least one section per chapter", `At chapter number ${chapterNumber}`, "error")
+        return null;
     }
+
+    for (let i = 0; i < sectionsText.length; i++) {
+        let section = createChapterSectionFromText(sectionsText[i], chapterNumber, i+1, questionNumber)
+        chapterObject.html.appendChild(section[0])
+        questionNumber = section[1]
+    }
+
     // Create the finishing section of the chapter
     let chapterFinishingSection = document.createElement('div')
-    chapterFinishingSection.className = 'section ' + sectionNumber++
+    chapterFinishingSection.className = 'section ' + ++sectionsText.length
     chapterFinishingSection.appendChild($.parseHTML(`<button onclick="course.finishLevel(${chapterNumber})" class="finish continue button small-button hover-anim">Finish</button>`)[0])
     chapterObject.html.appendChild(chapterFinishingSection)
 
     chapterObject.html = chapterObject.html.outerHTML
 
     return chapterObject
+}
+
+function createChapterSectionFromText(sectionText, chapterNumber, sectionNumber, questionNumber) {
+    let chapterSection = null;
+
+    switch (sectionText[1]) {
+        case 't': {
+            // Create text chapter section
+            let textDiv = createTextDiv(sectionText[0])
+            chapterSection = finishCreationOfChapterSection(textDiv, sectionNumber)
+            break;
+        }
+        case 'q': {
+            // Create question chapter section
+            let questionDiv = getQuestionDiv(sectionText[0], chapterNumber, questionNumber++)
+            chapterSection = finishCreationOfChapterSection(questionDiv, sectionNumber)
+            break;
+        }
+    }
+
+    return [chapterSection, questionNumber]
 }
 
 function sendCourseToServer(chapterObjects, imageUrl) {
@@ -204,7 +220,7 @@ function sendCourseToServer(chapterObjects, imageUrl) {
 }
 
 // `mainDiv` is the text or question div
-function createChapterSection(mainDiv, sectionNumber) {
+function finishCreationOfChapterSection(mainDiv, sectionNumber) {
     let chapterSection = document.createElement('div')
     chapterSection.className = 'section ' + sectionNumber++
     chapterSection.appendChild(mainDiv)
@@ -215,10 +231,10 @@ function createChapterSection(mainDiv, sectionNumber) {
     return chapterSection
 }
 
-function createTextDiv(chapterText) {
+function createTextDiv(sectionText) {
     let textDiv = document.createElement('div');
-    // Get the text content from `chapterText` by finding the first "string" in the text following the t{ declaration
-    let text = chapterText.match(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/)
+    // Get the text content from `sectionText` by finding the first "string" in the text following the t{ declaration
+    let text = sectionText.match(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/)
     if (text == null) return
     text = text[0]
 
@@ -227,11 +243,11 @@ function createTextDiv(chapterText) {
 }
 
 // Using chapterNumber and questionNumber only for assigning id to elements and for database
-function getQuestionDiv(chapterText, chapterNumber, questionNumber) {
-    // Extract question, answer and options from `chapterText` using regexp
-    let questionText = chapterText.match(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/)
-    let answerText = chapterText.substring(chapterText.indexOf('{c}')).match(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/)
-    let options = [...chapterText.substring(chapterText.indexOf('o{ '), chapterText.indexOf(' }o')).matchAll(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/g)]
+function getQuestionDiv(sectionText, chapterNumber, questionNumber) {
+    // Extract question, answer and options from `sectionText` using regexp
+    let questionText = sectionText.match(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/)
+    let answerText = sectionText.substring(sectionText.indexOf('{c}')).match(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/)
+    let options = [...sectionText.substring(sectionText.indexOf('o{ '), sectionText.indexOf(' }o')).matchAll(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/g)]
     if (questionText == null || answerText == null || options == null) return null;
     options = options.map((option) => {
         return option[0]
