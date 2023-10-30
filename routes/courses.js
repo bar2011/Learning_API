@@ -100,9 +100,6 @@ router.post('/options', async (req, res) => {
     }
     res.sendStatus(201)
 })
-router.get('/options', async (req, res) => {
-    res.send(await runSqlCode('SELECT * FROM course_options'))
-})
 router.get('/options/:id', async (req, res) => {
     // Extract course and question id from id given in parameters using regex
     let courseId = req.params.id.match(/^\d+/)
@@ -119,10 +116,6 @@ router.get('/options/:id', async (req, res) => {
     if (optionsList.length <= 0) return res.status(404).send(error404)
 
     res.send(optionsList)
-})
-
-router.get('/answers', async (req, res) => {
-    res.send(await runSqlCode('SELECT * FROM course_answers'))
 })
 
 router.post('/answers', async (req, res) => {
@@ -180,10 +173,6 @@ router.post('/answers/:id', async (req, res) => {
 
 router.post('/image', async (req, res) => {
     return res.sendStatus(await checkImageLink(req.body.url))
-})
-
-router.get('/', async (req, res) => {
-    res.send(await runSqlCode("SELECT * FROM courses"))
 })
 
 router.get('/:id/intro', async (req, res) => {

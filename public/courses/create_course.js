@@ -228,7 +228,6 @@ function createTextDiv(chapterText) {
 
 // Using chapterNumber and questionNumber only for assigning id to elements and for database
 function getQuestionDiv(chapterText, chapterNumber, questionNumber) {
-    console.log(chapterText)
     // Extract question, answer and options from `chapterText` using regexp
     let questionText = chapterText.match(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/)
     let answerText = chapterText.substring(chapterText.indexOf('{c}')).match(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/)
