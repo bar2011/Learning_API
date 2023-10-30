@@ -92,11 +92,11 @@ const error404 = '<!doctypehtml><title>Page not found</title><meta charset=utf-8
 
 router.post('/options', async (req, res) => {
     // If options with same course and question ID exist than the server can't create another set of options with the same ID
-    if ((await getRequest(`/courses/options/${req.body.course_id},${req.body.question_id}`)).statusCode == 200) return res.sendStatus(400)
+    if ((await getRequest(`/courses/options/${req.body.course_id},${req.body.chapterNumber}p${req.body.question_id}`)).statusCode == 200) return res.sendStatus(400)
 
     // Insert each option into course_options table
     for (let i = 1; i <= req.body.options_list.length; i++) {
-        runSqlCode('INSERT INTO course_options VALUES (?, ?, ?)', [req.body.course_id, req.body.question_id + i, req.body.options_list[i - 1]])
+        runSqlCode('INSERT INTO course_options VALUES (?, ?, ?, ?)', [req.body.course_id, req.body.chapterNumber, req.body.question_id + i, req.body.options_list[i - 1]])
     }
     res.sendStatus(201)
 })
@@ -127,12 +127,12 @@ router.get('/answers', async (req, res) => {
 
 router.post('/answers', async (req, res) => {
     // If answer hash with same course and question ID exist than the server can't create another answer with the same ID
-    if ((await getRequest(`/courses/answers/${req.body.course_id},${req.body.question_id}`)).statusCode == 200) return res.sendStatus(400)
+    if ((await getRequest(`/courses/answers/${req.body.course_id},${req.body.chapterNumber}p${req.body.question_id}`)).statusCode == 200) return res.sendStatus(400)
 
     try {
         // Hash answer gave by client
         const hashedAnswer = await bcrypt.hash("" + req.body.answer, 10)
-        runSqlCode('INSERT INTO course_answers VALUES (?, ?, ?)', [req.body.course_id, req.body.question_id, hashedAnswer])
+        runSqlCode('INSERT INTO course_answers VALUES (?, ?, ?, ?)', [req.body.course_id, req.body.chapterNumber, req.body.question_id, hashedAnswer])
         res.sendStatus(201)
     } catch {
         res.sendStatus(500)
@@ -254,13 +254,12 @@ router.post('/', async (req, res) => {
     // If course with same ID exist than the server can't create another course with the same ID
     if ((await getRequest(`/courses/${req.body.id}`)).statusCode == 200) return res.sendStatus(400)
 
-    // Get rid of errors in html
-    let html = req.body.html.join()
-    // html = mysql.escape(html)
-    html = html.substring(0, html.length - 1)
+    req.body.chapters.forEach(chapter => {
+        runSqlCode(`INSERT INTO course_chapters (course_id, chapter_number, chapter_title, chapter_image, chapter_html) VALUES (?, ?, ?, ?, ?)`, [req.body.courseId, chapter.chapterNumber, chapter.title, chapter.image, chapter.html])
+    });
 
     // Insert a new course into courses table
-    runSqlCode(`INSERT INTO courses (course_title, course_description, course_image, course_html) VALUES (?, ?, ?, ?)`, [req.body.title, req.body.description, req.body.image, html])
+    runSqlCode(`INSERT INTO courses (course_title, course_description, course_image) VALUES (?, ?, ?)`, [req.body.title, req.body.description, req.body.image])
     res.sendStatus(201)
 })
 
