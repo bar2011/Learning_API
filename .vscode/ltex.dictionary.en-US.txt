@@ -4,3 +4,8 @@ onclick
 br
 fieldset
 hover-anim
+forEach
+href
+imageUrl
+lastIndexOf
+img
