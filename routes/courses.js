@@ -175,46 +175,10 @@ router.post('/image', async (req, res) => {
     return res.sendStatus(await checkImageLink(req.body.url))
 })
 
-router.get('/:id/intro', async (req, res) => {
-    let title = await runSqlCode('SELECT course_title FROM courses WHERE course_id = ?', [req.params.id])
-    if (title.length <= 0) return res.status(404).send(error404)
-    title = title[0].course_title
-    res.send('<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta content="IE=edge" http-equiv="X-UA-Compatible"><meta content="width=device-width,initial-scale=1" name="viewport"><link href="../courses.css" rel="stylesheet"><link href="../../main.css" rel="stylesheet"><title>' + title + ' Course Intro</title></head><body><h1>Welcome to ' + title + '!</h1><h2>Press here to start →<button class="button small-button hover-anim" onclick=\'location.href="./1p"\'>Continue</button></h2></body></html>')
-})
-
-router.get('/:id/outro', async (req, res) => {
-    // TODO: actually make this
-    res.send("Completed course or something!")
-})
-
-router.get('/:id/progress', async (req, res) => {
-    let courseTitle = await runSqlCode('SELECT course_title FROM courses WHERE course_id = ?', [req.params.id])
-    const chapters = await runSqlCode('SELECT chapter_title FROM course_chapters WHERE course_id = ?', [req.params.id])
-    if (courseTitle.length <= 0 || chapters.length <= 0) return res.status(404).send(error404)
-
-    courseTitle = courseTitle[0].course_title
-    const chapterCount = chapters.length
-    let chapterText = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta content="width=device-width,initial-scale=1" name="viewport"><title>' + courseTitle + ' Progress</title><link href="../courses.css" rel="stylesheet"><link href="../../main.css" rel="stylesheet"><script src="../../sketch.js"></script><script src="../courseFunctions.js"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script></head><body><div class="reset-button"><button class="button small-button hover-anim" onclick="reset()">Reset</button></div>'
-    for (let i = 1; i <= chapterCount; i++) {
-        chapterText += '<div class="chapter ' + i + '"><h1>Chapter ' + i + ` - ${chapters[i-1].chapter_title}</h1></div>`
-    }
-    res.send(chapterText)
-})
-
-router.get('/:id/:part', async (req, res) => {
-    if (!req.params.part.endsWith('p')) return res.status(404).send(error404)
-    const html = await runSqlCode('SELECT chapter_html FROM course_chapters WHERE course_id = ? AND chapter_number = ?', [req.params.id, req.params.part.slice(0, -1)])
-    if (html.length <= 0) return res.status(404).send(error404)
-
-    let chapterHTML = '<link href="../courses.css" rel="stylesheet"><link href="../../main.css" rel="stylesheet"><script src="../../sketch.js"></script><script src="../courseFunctions.js"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>' +
-        html[0].chapter_html
-    res.send(chapterHTML)
-})
-
 router.get('/id', async (req, res) => {
     const courses = await runSqlCode('SELECT course_id FROM courses')
-    if (courses.length <=0) return res.send(1+'').status(200)
-    res.send(courses.length+1+'').status(200)
+    if (courses.length <=0) return res.send(1+'')
+    res.send((courses.length+1)+'')
 })
 
 router
