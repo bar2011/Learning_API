@@ -21,40 +21,54 @@ app.use(express.static('./public'))
 app.set('view engine', 'ejs')
 
 app.get("/", async (req, res) => {
-    if (req.query.site == null || req.query.site == "main") {
-        let imageLinks = await runSqlCode("SELECT course_image FROM courses")
-        imageLinks.forEach(link => {
-            getImageFromLink(link.course_image)
-        });
-        let courses = await runSqlCode("SELECT * FROM courses");
-        res.render('main', { courses })
-    } else if (req.query.site == "createCourse") {
-        res.render('createCourse')
-    } else if (req.query.site == "intro") {
-        const id = req.query.id
-        if (parseInt(id) == undefined) return res.status(404).render('404')
-        let title = await runSqlCode('SELECT course_title FROM courses WHERE course_id = ?', [id])
-        if (title.length <= 0) return res.status(404).render('404')
-        title = title[0].course_title
-        res.render('intro', { title, id })
-    } else if (req.query.site == "chapter") {
-        if (parseInt(req.query.chapterNumber) == undefined) return res.status(404).render('404')
-        if (parseInt(req.query.id) == undefined) return res.status(404).render('404')
-        let chapterData = await runSqlCode('SELECT chapter_html, chapter_title FROM course_chapters WHERE course_id = ? AND chapter_number = ?', [req.query.id, req.query.chapterNumber])
-        if (chapterData.length <= 0 || chapterData.length > 1) return res.status(404).render('404')
-        let chapterHtml = chapterData[0].chapter_html
-        let title = chapterData[0].chapter_title
-        res.render('chapter', { chapterHtml, title })
-    } else if (req.query.site == "progress") {
-        let courseTitle = await runSqlCode('SELECT course_title FROM courses WHERE course_id = ?', [req.query.id])
-        const chapters = await runSqlCode('SELECT chapter_title FROM course_chapters WHERE course_id = ?', [req.query.id])
-        if (courseTitle.length <= 0 || chapters.length <= 0) return res.status(404).send(error404)
+    switch (req.query.site) {
+        case undefined: {
+            let imageLinks = await runSqlCode("SELECT course_image FROM courses")
+            imageLinks.forEach(link => {
+                getImageFromLink(link.course_image)
+            });
+            let courses = await runSqlCode("SELECT * FROM courses");
+            res.render('main', { courses })
+            break;
+        }
+        case "createCourse": {
+            res.render('createCourse')
+            break;
+        }
+        case "intro": {
+            const id = req.query.id
+            if (parseInt(id) == undefined) return res.status(404).render('404')
+            let title = await runSqlCode('SELECT course_title FROM courses WHERE course_id = ?', [id])
+            if (title.length <= 0) return res.status(404).render('404')
+            title = title[0].course_title
+            res.render('intro', { title, id })
+            break;
+        }
+        case "chapter": {
+            if (parseInt(req.query.chapterNumber) == undefined) return res.status(404).render('404')
+            if (parseInt(req.query.id) == undefined) return res.status(404).render('404')
+            let chapterData = await runSqlCode('SELECT chapter_html, chapter_title FROM course_chapters WHERE course_id = ? AND chapter_number = ?', [req.query.id, req.query.chapterNumber])
+            if (chapterData.length <= 0 || chapterData.length > 1) return res.status(404).render('404')
+            let chapterHtml = chapterData[0].chapter_html
+            let title = chapterData[0].chapter_title
+            res.render('chapter', { chapterHtml, title })
+            break;
+        }
+        case "progress": {
+            let courseTitle = await runSqlCode('SELECT course_title FROM courses WHERE course_id = ?', [req.query.id])
+            const chapters = await runSqlCode('SELECT chapter_title FROM course_chapters WHERE course_id = ?', [req.query.id])
+            if (courseTitle.length <= 0 || chapters.length <= 0) return res.status(404).send(error404)
 
-        courseTitle = courseTitle[0].course_title
+            courseTitle = courseTitle[0].course_title
 
-        res.render('progress', { courseTitle, chapters })
-    } else {
-        res.status(404).render('404')
+            res.render('progress', { courseTitle, chapters })
+            break;
+        }
+        case "outro": {
+            res.render('outro')
+        }
+        default:
+            res.status(404).render('404')
     }
 })
 
