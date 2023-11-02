@@ -47,11 +47,17 @@ app.get("/", async (req, res) => {
         case "chapter": {
             if (parseInt(req.query.chapterNumber) == undefined) return res.status(404).render('404')
             if (parseInt(req.query.id) == undefined) return res.status(404).render('404')
-            let chapterData = await runSqlCode('SELECT chapter_html, chapter_title FROM course_chapters WHERE course_id = ? AND chapter_number = ?', [req.query.id, req.query.chapterNumber])
-            if (chapterData.length <= 0 || chapterData.length > 1) return res.status(404).render('404')
-            let chapterHtml = chapterData[0].chapter_html
-            let title = chapterData[0].chapter_title
-            res.render('chapter', { chapterHtml, title })
+            let chapterData = await runSqlCode('SELECT chapter_html, chapter_title, current_section FROM course_chapters WHERE course_id = ? AND chapter_number = ?',
+                [req.query.id, req.query.chapterNumber])
+            let courseData = await runSqlCode('SELECT current_chapter FROM courses WHERE course_id = ?', [req.query.id])
+            if ((chapterData.length <= 0 || chapterData.length > 1) || (courseData.length <= 0 || courseData.length > 1)) return res.status(404).render('404')
+            res.render('chapter', {
+                chapterHtml: chapterData[0].chapter_html,
+                title: chapterData[0].chapter_title,
+                id: req.query.id,
+                chapterProgress: chapterData[0].current_section,
+                currentChapter: courseData[0].current_chapter
+            })
             break;
         }
         case "progress": {

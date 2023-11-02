@@ -1,14 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <link href="./courses/courses.css" rel="stylesheet">
-    <link href="./main.css" rel="stylesheet">
-    <script src="./sketch.js"></script>
-    <script src="./courses/courseFunctions.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-    <title><%= title %></title>
+  <link href="./courses/courses.css" rel="stylesheet">
+  <link href="./main.css" rel="stylesheet">
+  <script src="./sketch.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+  <title><%= title %></title>
 </head>
+
 <body>
-    <%- chapterHtml %>
+  <%- chapterHtml %>
+  <script>
+    let title = "<%= title %>";
+    let chapterProgress = <%= chapterProgress %>;
+    let currentChapter = <%= currentChapter %>;
+    let id = <%= id %>;
+    let chapterHtml = "<%= chapterHtml %>";
+    let course = new Course(title, chapterProgress, currentChapter, id, chapterHtml)
+    course.showDocument()
+  </script>
 </body>
+
 </html>

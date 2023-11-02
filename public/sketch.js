@@ -2,11 +2,10 @@ var courses = [];
 var my_courses = [];
 
 class Course {
-    constructor(title, description, current_div = 1, progress = 1, id, html) {
+    constructor(title, currentSection = 1, currentChapter = 1, id, html) {
         this.title = title;
-        this.description = description;
-        this.currentSection = current_div;
-        this.currentChapter = progress;
+        this.currentSection = currentSection;
+        this.currentChapter = currentChapter;
         this.id = id;
         this.html = html
 
@@ -165,7 +164,6 @@ class Course {
             type: 'PUT',
             data: {
                 title: this.title,
-                description: this.description,
                 current_div: this.currentSection,
                 progress: this.currentChapter,
                 html: this.html.join()
@@ -191,21 +189,4 @@ class Course {
 
         return array;
     }
-}
-
-async function init(id) {
-    let course
-    await $.get(`/courses/${id}`, function (data, status) {
-        let html = data.course_html.split(',')
-        course = new Course(
-            data.course_title,
-            data.course_description,
-            data.current_div,
-            data.current_progress,
-            data.course_id,
-            html
-        )
-    });
-    course.showDocument()
-    return course;
 }

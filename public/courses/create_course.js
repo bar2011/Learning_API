@@ -226,7 +226,7 @@ function finishCreationOfChapterSection(mainDiv, sectionNumber) {
     chapterSection.appendChild(mainDiv)
 
     // Add button for continuing in the chapter
-    chapterSection.appendChild($.parseHTML('<button onclick="showNext()" class="continue button small-button hover-anim">Continue</button>')[0])
+    chapterSection.appendChild($.parseHTML('<button onclick="course.showNext()" class="continue button small-button hover-anim">Continue</button>')[0])
 
     return chapterSection
 }
