@@ -100,13 +100,13 @@ router.post('/options', async (req, res) => {
 router.get('/options/:id', async (req, res) => {
     // Extract course and question id from id given in parameters and query
     let courseId = req.params.id
-    let chapterNumber = req.query.chapterNumber
+    let currentChapter = req.query.currentChapter
     let questionId = req.query.questionId
 
-    if (courseId == null || chapterNumber == null || questionId == null) return res.sendStatus(400)
+    if (courseId == null || currentChapter == null || questionId == null) return res.sendStatus(400)
 
     // Select options
-    let optionsList = await runSqlCode('SELECT * FROM course_options WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?', [courseId, chapterNumber, '^'+questionId])
+    let optionsList = await runSqlCode('SELECT * FROM course_options WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?', [courseId, currentChapter, '^' + questionId])
 
     if (optionsList.length <= 0) return res.sendStatus(404)
 
@@ -115,7 +115,7 @@ router.get('/options/:id', async (req, res) => {
 
 router.post('/answers', async (req, res) => {
     // If answer hash with same course and question ID exist than the server can't create another answer with the same ID
-    if ((await getRequest(`/courses/answers/${req.body.course_id}?chapterNumber=${req.body.chapterNumber}&questionId=${req.body.question_id}`)).statusCode == 200) return res.sendStatus(400)
+    if ((await getRequest(`/courses/answers/${req.body.course_id}?currentChapter=${req.body.chapterNumber}&questionId=${req.body.question_id}`)).statusCode == 200) return res.sendStatus(400)
 
     try {
         // Hash answer gave by client
@@ -130,13 +130,13 @@ router.post('/answers', async (req, res) => {
 router.get('/answers/:id', async (req, res) => {
     // Extract course and question id from id given in parameters and in query
     let courseId = req.params.id
-    let chapterNumber = req.query.chapterNumber
+    let currentChapter = req.query.currentChapter
     let questionId = req.query.questionId
 
-    if (courseId == null || chapterNumber == null || questionId == null) return res.sendStatus(400)
+    if (courseId == null || currentChapter == null || questionId == null) return res.sendStatus(400)
 
     // Select answer hash
-    let answerHash = await runSqlCode('SELECT * FROM course_answers WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?', [courseId, chapterNumber, '^'+questionId])
+    let answerHash = await runSqlCode('SELECT * FROM course_answers WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?', [courseId, currentChapter, '^' + questionId])
 
     if (answerHash.length <= 0) return res.sendStatus(404)
 
@@ -146,13 +146,13 @@ router.get('/answers/:id', async (req, res) => {
 router.post('/answers/:id', async (req, res) => {
     // Extract course and question id from id given in parameters and in query
     let courseId = req.params.id
-    let chapterNumber = req.query.chapterNumber
+    let currentChapter = req.query.currentChapter
     let questionId = req.query.questionId
 
-    if (courseId == null || chapterNumber == null || questionId == null) return res.sendStatus(400)
+    if (courseId == null || currentChapter == null || questionId == null) return res.sendStatus(400)
 
     // Select answer hash
-    let answerHash = await runSqlCode('SELECT * FROM course_answers WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?', [courseId, chapterNumber, '^'+questionId])
+    let answerHash = await runSqlCode('SELECT * FROM course_answers WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?', [courseId, currentChapter, '^' + questionId])
 
     if (answerHash.length <= 0) return res.status(404).send(false)
 
@@ -174,8 +174,8 @@ router.post('/image', async (req, res) => {
 
 router.get('/id', async (req, res) => {
     const courses = await runSqlCode('SELECT course_id FROM courses')
-    if (courses.length <=0) return res.send(1+'')
-    res.send((courses.length+1)+'')
+    if (courses.length <= 0) return res.send(1 + '')
+    res.send((courses.length + 1) + '')
 })
 
 router
@@ -190,8 +190,9 @@ router
         if ((await getRequest(`/courses/${req.params.id}`)).statusCode == 404) return res.sendStatus(404)
 
         // Update course with values
-        runSqlCode('UPDATE courses SET course_title = ?, current_chapter = ? WHERE course_id = ?',
-            [req.body.title, req.body.progress, req.params.id])
+        runSqlCode('UPDATE courses SET current_chapter = ? WHERE course_id = ?', [req.body.currentChapter, req.params.id])
+        runSqlCode('UPDATE course_chapters SET current_section = ? WHERE course_id = ? AND chapter_number = ?',
+            [req.body.currentSection, req.params.id, req.body.currentChapter])
         res.sendStatus(204)
     })
     .delete(async (req, res) => {

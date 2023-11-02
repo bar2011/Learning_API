@@ -3,7 +3,8 @@
     src: url(./images/Roboto-Bold.ttf);
 }
 
-#courses-div {
+#courses-div,
+#progress-div {
     width: 100%;
     display: grid;
     grid-template-columns: 200px 200px 200px 200px 200px 200px;
@@ -17,7 +18,8 @@
     font-family: "Roboto";
 }
 
-.course-image {
+.course-image,
+.chapter-image {
     border: 1px solid #bcbcbc;
     box-shadow: 1px 2px #dfdfdf;
     border-radius: 9.09%;
@@ -33,11 +35,13 @@
     }
 }
 
-.course {
+.course,
+.chapter {
     text-align: center;
 }
 
-.course-title {
+.course-title,
+.chapter-title {
     font-size: larger;
 }
 

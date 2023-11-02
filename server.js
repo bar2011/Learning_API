@@ -61,13 +61,11 @@ app.get("/", async (req, res) => {
             break;
         }
         case "progress": {
-            let courseTitle = await runSqlCode('SELECT course_title FROM courses WHERE course_id = ?', [req.query.id])
-            const chapters = await runSqlCode('SELECT chapter_title FROM course_chapters WHERE course_id = ?', [req.query.id])
-            if (courseTitle.length <= 0 || chapters.length <= 0) return res.status(404).send(error404)
+            let courseData = await runSqlCode('SELECT course_title, current_chapter FROM courses WHERE course_id = ?', [req.query.id])
+            const chapters = await runSqlCode('SELECT chapter_title, chapter_image FROM course_chapters WHERE course_id = ?', [req.query.id])
+            if (courseData.length <= 0 || chapters.length <= 0) return res.status(404).send(error404)
 
-            courseTitle = courseTitle[0].course_title
-
-            res.render('progress', { courseTitle, chapters })
+            res.render('progress', { courseTitle: courseData[0].course_title, currentChapter: courseData[0].current_chapter, chapters, id: req.query.id })
             break;
         }
         case "outro": {

@@ -4,16 +4,50 @@
         <meta charset="UTF-8">
         <meta content="width=device-width,initial-scale=1" name="viewport">
         <title><%= courseTitle %> Progress</title>
-        <link href="./courses/courses.css" rel="stylesheet">
         <link href="./main.css" rel="stylesheet">
-        <script src="./sketch.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
     </head>
 
     <body class="side">
         <div class="reset-button"><button class="button small-button hover-anim" onclick="course.reset()">Reset</button></div>
-        <% for( let currentChapter = 0; currentChapter < chapters.length; currentChapter++ ) { %>
-            <div class="chapter <%= currentChapter+1 %>"><h1>Chapter <%= currentChapter %>: <%= chapters[currentChapter].chapter_title %></h1></div>
-        <% } %>
+        <div id="progress-div">
+            <% for( let chapter = 0; chapter < chapters.length; chapter++ ) { %>
+                <!-- <div class="chapter <%= chapter+1 %>"><h1>Chapter <%= chapter %>: <%= chapters[chapter].chapter_title %></h1></div> -->
+                <div class="chapter"
+                    <% let onclick = "" %>
+                    <% if (chapter <= currentChapter) { %>
+                        <% onclick = `./?site=chapter&chapterNumber=${chapter+1}&id=${id}` %>
+                    <% } %>
+                    onclick="location.href='<%= onclick %>'">
+                    <div class="chapter-image">
+                        <img src="./images/<% let imageUrl = chapters[chapter].chapter_image %><%= imageUrl.substring(imageUrl.lastIndexOf('/') + 1).trim() %>"
+                            width="102" height="102">
+                    </div>
+                    <p class="chapter-title">
+                        <%= chapters[chapter].chapter_title %>
+                    </p>
+                </div>
+            <% } %>
+        </div>
     </body>
+
+    <script>
+        // Send to outro page if completed course
+        if (this.currentChapter > this.chapters.length && this.chapters.length > 0) return location.href = "./?site=outro"
+
+        // Makes each chapter send you to its corresponding part
+        for (let i = 0; i < this.currentChapter; i++) {
+            this.chapters[i].onclick = () => {
+                location.href = `./?site=chapter&id=${this.id}&chapterNumber=${(i + 1)}`
+            }
+            this.chapters[i].getElementsByTagName('h1')[0].style.display = 'block'
+        }
+
+        // Adds closed lock image to not open chapters
+        for (let i = this.currentChapter; i < this.chapters.length; i++) {
+            let img = document.createElement('img');
+            img.setAttribute('src', './images/closed_lock.jpeg');
+            this.chapters[i].appendChild(img);
+        }
+    </script>
 </html>
