@@ -12,13 +12,11 @@
 <body>
   <%- chapterHtml %>
   <script>
-    let title = "<%= title %>";
     let chapterProgress = <%= chapterProgress %>;
     let currentChapter = <%= currentChapter %>;
     let id = <%= id %>;
-    let chapterHtml = "<%= chapterHtml %>";
-    let course = new Course(title, chapterProgress, currentChapter, id, chapterHtml)
-    course.showDocument()
+    let course = new Course(chapterProgress, currentChapter, id)
+    course.showDivs()
   </script>
 </body>
 

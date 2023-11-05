@@ -213,7 +213,7 @@ function sendCourseToServer(chapterObjects, imageUrl) {
             image: imageUrl,
             chapters: chapterObjects
         },
-        success: function (data) {
+        success: function () {
             swal("Course Created Successfully", "", "success")
         }
     })
@@ -262,7 +262,7 @@ function getQuestionDiv(sectionText, chapterNumber, questionNumber) {
 function createQuestionHtml(chapterNumber, questionNumber, questionText, answerText, options) {
     // Create parent question element
     let questionNode = document.createElement("fieldset");
-    questionNode.id = id + 'i' + chapterNumber + 'p' + questionNumber + 'q'
+    questionNode.id = questionNumber
     questionNode.appendChild(document.createElement("legend"));
     questionNode.childNodes[0].innerHTML = questionText;
 
@@ -276,7 +276,7 @@ function createQuestionHtml(chapterNumber, questionNumber, questionText, answerT
         let currentOption = document.createElement("label")
         currentOption.appendChild(document.createElement("input"))
         currentOption.childNodes[0].type = "radio"
-        currentOption.childNodes[0].id = id + 'i' + chapterNumber + 'p' + questionNumber + 'q' + i + 'o'
+        currentOption.childNodes[0].id = questionNumber + '#' + i
         currentOption.childNodes[0].name = questionText + questionNumber
         if (i == 1) currentOption.childNodes[0].checked = true
         currentOption.appendChild(document.createElement("span"))
@@ -286,8 +286,8 @@ function createQuestionHtml(chapterNumber, questionNumber, questionText, answerT
 
     // Send question to server
     options.push(answerText)
-    $.post('/courses/options/', { course_id: id, chapterNumber: chapterNumber, question_id: `${questionNumber}q`, options_list: shuffle(options) })
-    $.post('/courses/answers/', { course_id: id, chapterNumber: chapterNumber, question_id: `${questionNumber}q`, answer: answerText })
+    $.post('/courses/options/', { course_id: id, chapterNumber: chapterNumber, question_id: questionNumber, options_list: shuffle(options) })
+    $.post('/courses/answers/', { course_id: id, chapterNumber: chapterNumber, question_id: questionNumber, answer: answerText })
 
     return questionNode;
 }

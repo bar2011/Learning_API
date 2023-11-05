@@ -2,15 +2,12 @@ var courses = [];
 var my_courses = [];
 
 class Course {
-    constructor(title, currentSection = 1, currentChapter = 1, id, html) {
-        this.title = title;
+    constructor(currentSection = 1, currentChapter = 1, id) {
         this.currentSection = currentSection;
         this.currentChapter = currentChapter;
         this.id = id;
-        this.html = html
 
         this.sections = document.getElementsByClassName('section');
-        this.chapters = document.getElementsByClassName('chapter');
         this.continueButtons = document.getElementsByClassName('continue');
         this.questions = document.getElementsByTagName('fieldset')
     }
@@ -31,14 +28,11 @@ class Course {
             let currentInputNode = option.childNodes[0]
             if (currentInputNode.checked) chosenOption = option
         })
-        let questionId = questionFieldset.id.match(/i\d+p\d+q/)
-        if (questionId == null) return false;
-        questionId = questionId[0].substring(1)
 
         let isCorrectAnswer = false
         await $.ajax({
             type: 'POST',
-            url: `/courses/answers/${this.id},${questionId}`,
+            url: `/courses/answers/${this.id}?currentChapter=${this.currentChapter}&questionId=${questionFieldset.id}`,
             data: { option: chosenOption.childNodes[1].innerHTML },
             success: function (data, status) {
                 isCorrectAnswer = data
@@ -61,13 +55,17 @@ class Course {
 
     async finishLevel(currentChapter) {
         // check that user is in last div and that this function is executed for this chapter
-        if (currentChapter != this.currentChapter) return
+        if (currentChapter > this.currentChapter) return
         if (this.currentSection != this.sections.length) return
-
-        this.currentChapter++;
+        
+        // Update course twice:
+        // One time to reset the current chapter and another time to move to the next one
         this.currentSection = 1
         this.updateCourse()
-        location.href = './progress'
+
+        this.currentChapter = currentChapter + 1;
+        this.updateCourse()
+        location.href = `./?site=progress&id=${this.id}`
     }
 
     reset() {
@@ -78,31 +76,6 @@ class Course {
         }
     }
 
-    showDocument() {
-        if (location.href.endsWith("progress")) return this.showProgressPage()
-        if (location.href.endsWith("p")) this.showDivs(); // p = part
-    }
-
-    showProgressPage() {
-        // Send to outro page if completed course
-        if (this.currentChapter > this.chapters.length && this.chapters.length > 0) return location.href = "./outro"
-
-        // Makes each chapter send you to its corresponding part
-        for (let i = 0; i < this.currentChapter; i++) {
-            this.chapters[i].onclick = () => {
-                location.href = `./${(i + 1)}p`
-            }
-            this.chapters[i].getElementsByTagName('h1')[0].style.display = 'block'
-        }
-
-        // Adds closed lock image to not open chapters
-        for (let i = this.currentChapter; i < this.chapters.length; i++) {
-            let img = document.createElement('img');
-            img.setAttribute('src', '../../images/closed_lock.jpeg');
-            this.chapters[i].appendChild(img);
-        }
-    }
-
     async generateQuestions() {
         for (let questionNumber = 1; questionNumber <= this.questions.length; questionNumber++) {
             let questionDiv = this.questions[questionNumber - 1]
@@ -110,7 +83,7 @@ class Course {
             let options
             await $.ajax({
                 type: "GET",
-                url: `/courses/options/${this.id},${this.currentChapter}p${questionNumber}q`,
+                url: `/courses/options/${this.id}?currentChapter=${this.currentChapter}&questionId=${questionNumber}`,
                 success: function (data, status) {
                     options = data
                 }
@@ -132,7 +105,7 @@ class Course {
             let isAnswer
             await $.ajax({
                 type: "POST",
-                url: `/courses/answers/${this.id},${this.currentChapter}p${questionNumber}q`,
+                url: `/courses/answers/${this.id}?currentChapter=${this.currentChapter}&questionId=${questionNumber}`,
                 data: { option: options[i] },
                 success: function (data, status) {
                     isAnswer = data
@@ -163,10 +136,8 @@ class Course {
             url: `/courses/${id}`,
             type: 'PUT',
             data: {
-                title: this.title,
-                current_div: this.currentSection,
-                progress: this.currentChapter,
-                html: this.html.join()
+                currentSection: this.currentSection,
+                currentChapter: this.currentChapter,
             }
         });
     }
