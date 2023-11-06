@@ -67,13 +67,12 @@ function convertTextToHTML() {
     courseData = [...courseData.matchAll(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/g)]
 
     title = courseData[0][0]
-    if (!/^[\w\d\s]+$/.test(title) || title.length < 3 || title.length > 30)
-        return swal("The title you entered is INVALID", "Your title needs to be between 3 and 30 characters.\nPlus it can't contain any special characters in it", "error");
+    if (!/^([\w\d\s\"\(\)\?]|(?:\\[\'\}\{}]))+$/.test(title) || title.length < 3 || title.length > 30)
+        return swal("The title you entered is INVALID", "Your title needs to be between 3 and 30 characters.\nThe only special characters that are allowed are the following:\n\", \\{, \\}, (, ), ?, \\'", "error");
 
     description = courseData[1][0]
-    if ((!/^[\w\d\s]+$/.test(description) || description.length < 15 || description.length > 250) && description.length > 0)
-        return swal("The description you entered is INVALID", "Your description needs to be between 15 and 250 characters.\nPlus it can't contain any special characters in it", "error");
-    else description = null
+    if ((!/^([\w\d\s\"\(\)\?]|(?:\\[\'\}\{}]))+$/.test(description) || description.length < 15 || description.length > 250) && description.length > 0)
+        return swal("The description you entered is INVALID", "Your description needs to be between 15 and 250 characters.\nThe only special characters that are allowed are the following:\n\", \\{, \\}, (, ), ?, \\'", "error");
 
     let imageUrl = courseData[2][0]
     imageUrl = checkImage(imageUrl)
@@ -139,8 +138,8 @@ function createChapter(chapterText, chapterNumber) {
     chapterData = [...chapterData.matchAll(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/g)]
 
     chapterObject.title = chapterData[0][0]
-    if (!/^[\w\d\s]+$/.test(chapterObject.title) || chapterObject.title.length < 3 || chapterObject.title.length > 30) {
-        swal(`The title you entered for chapter ${chapterNumber} is INVALID`, "Your title needs to be between 3 and 30 characters.\nPlus it can't contain any special characters in it", "error");
+    if (!/^([\w\d\s\"\(\)\?]|(?:\\[\'\}\{}]))+$/.test(chapterObject.title) || chapterObject.title.length < 3 || chapterObject.title.length > 30) {
+        swal(`The title you entered for chapter ${chapterNumber} is INVALID`, "Your title needs to be between 3 and 30 characters.\nThe only special characters that are allowed are the following:\n\", \\{, \\}, (, ), ?, \\'", "error");
         return null;
     }
 

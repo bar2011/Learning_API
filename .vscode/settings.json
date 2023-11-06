@@ -1,3 +1,4 @@
 {
-    "workbench.activityBar.visible": false
+    "workbench.activityBar.visible": false,
+    "compile-hero.disable-compile-files-on-did-save-code": true
 }
