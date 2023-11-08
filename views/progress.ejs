@@ -11,12 +11,16 @@
 </head>
 
 <body class="side">
-  <div class="reset-button"><button class="button small-button hover-anim" onclick="course.reset()">Reset</button></div>
+  <button class="button large-button hover-anim" onclick="location.href='../'">&#8617; Go Back to Main Page</button>
   <div id="progress-div">
     <% for( let chapter = 0; chapter < chapters.length; chapter++ ) { %>
-    <div class="chapter" <% let onclick = "" %> <% if (chapter <= currentChapter) { %> <% onclick = `./?site=chapter&chapterNumber=${chapter+1}&id=${id}` %> <% } %> onclick="location.href='<%= onclick %>'">
+    <div class="chapter" <% let onclick = "" %> <% if (chapter <= currentChapter) { %>
+      <% onclick = `./?site=chapter&chapterNumber=${chapter+1}&id=${id}` %> <% } %>
+      onclick="location.href='<%= onclick %>'">
       <div class="chapter-image">
-        <img src="./images/<% let imageUrl = chapters[chapter].chapter_image %><%= imageUrl.substring(imageUrl.lastIndexOf('/') + 1).trim() %>" width="102" height="102">
+        <img
+          src="./images/<% let imageUrl = chapters[chapter].chapter_image %><%= imageUrl.substring(imageUrl.lastIndexOf('/') + 1).trim() %>"
+          width="102" height="102">
       </div>
       <p class="chapter-title">
         <%= chapters[chapter].chapter_title %>
@@ -29,34 +33,45 @@
 <script>
   function loadPage() {
     // reset course and send to outro page if completed course
-    if (<%= currentChapter %> > <%= chapters.length %> && <%= chapters.length %> > 0) {
-        $.ajax({
-            url: `/courses/<%= id %>`,
-            type: 'PUT',
-            data: {
-                currentSection: 1,
-                currentChapter: 1,
-            }
-        });
+    if ( <%= currentChapter %> > <%= chapters.length %> && <%= chapters.length %> > 0) {
+      $.ajax({
+        url: `/courses/<%= id %>`,
+        type: 'PUT',
+        data: {
+          currentSection: 1,
+          currentChapter: 1,
+        }
+      });
       return location.href = "./?site=outro"
     }
 
     // Makes each chapter send you to its corresponding part
     let chapters = document.getElementsByClassName("chapter");
 
-    for (let i = 0; i < <%= currentChapter %>; i++) {
+    for (let i = 0; i < <%= currentChapter %> ; i++) {
       chapters[i].onclick = () => {
         location.href = `./?site=chapter&id=<%= id %>&chapterNumber=${i + 1}`
       }
+      chapters[i].style.color = "#86B049";
     }
 
     // Adds closed lock image to not open chapters
-    for (let i = <%= currentChapter %>; i < chapters.length; i++) {
+    for (let i = <%= currentChapter %> ; i < chapters.length; i++) {
       chapters[i].onclick = () => {
         swal("Before you get to this chapter, you need to complete chapter number <%= currentChapter %>", "", "error")
       }
     }
   }
+
+  function reset() {
+    // TODO
+      if (confirm("Are you sure you want to reset all progress on this course?")) {
+          this.currentChapter = 1
+          this.currentSection = 1
+          this.updateCourse()
+      }
+  }
+
   loadPage();
 </script>
 

@@ -57,7 +57,9 @@ async function checkImageLink(imageUrl) {
     var response
 
     try {
-        response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+        response = await axios.get(imageUrl, {
+            responseType: 'arraybuffer'
+        });
     } catch {
         return 404
     }
@@ -74,7 +76,9 @@ async function getImageFromLink(imageUrl) {
     const imageName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1)
 
     // From https://byby.dev/node-download-image#:~:text=This%20is%20a%20common%20task,that%20data%20to%20a%20file.
-    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+    const response = await axios.get(imageUrl, {
+        responseType: 'arraybuffer'
+    });
 
     fs.writeFile('./public/images/' + imageName, response.data, (err) => {
         if (err) throw err
@@ -93,7 +97,8 @@ router.post('/options', async (req, res) => {
 
     // Insert each option into course_options table
     for (let i = 1; i <= req.body.options_list.length; i++) {
-        runSqlCode('INSERT INTO course_options VALUES (?, ?, ?, ?)', [req.body.course_id, req.body.chapterNumber, req.body.question_id + i, req.body.options_list[i - 1]])
+        runSqlCode('INSERT INTO course_options VALUES (?, ?, ?, ?)',
+                   [req.body.course_id, req.body.chapterNumber, req.body.question_id + i, req.body.options_list[i - 1]])
     }
     res.sendStatus(201)
 })
@@ -106,7 +111,8 @@ router.get('/options/:id', async (req, res) => {
     if (courseId == null || currentChapter == null || questionId == null) return res.sendStatus(400)
 
     // Select options
-    let optionsList = await runSqlCode('SELECT * FROM course_options WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?', [courseId, currentChapter, '^' + questionId])
+    let optionsList = await runSqlCode('SELECT * FROM course_options WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?',
+                                       [courseId, currentChapter, '^' + questionId])
 
     if (optionsList.length <= 0) return res.sendStatus(404)
 
@@ -136,7 +142,8 @@ router.get('/answers/:id', async (req, res) => {
     if (courseId == null || currentChapter == null || questionId == null) return res.sendStatus(400)
 
     // Select answer hash
-    let answerHash = await runSqlCode('SELECT * FROM course_answers WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?', [courseId, currentChapter, '^' + questionId])
+    let answerHash = await runSqlCode('SELECT * FROM course_answers WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?',
+                                      [courseId, currentChapter, '^' + questionId])
 
     if (answerHash.length <= 0) return res.sendStatus(404)
 
@@ -152,7 +159,8 @@ router.post('/answers/:id', async (req, res) => {
     if (courseId == null || currentChapter == null || questionId == null) return res.sendStatus(400)
 
     // Select answer hash
-    let answerHash = await runSqlCode('SELECT * FROM course_answers WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?', [courseId, currentChapter, '^' + questionId])
+    let answerHash = await runSqlCode('SELECT * FROM course_answers WHERE course_id = ? AND chapter_number = ? AND question_id REGEXP ?',
+                                      [courseId, currentChapter, '^' + questionId])
 
     if (answerHash.length <= 0) return res.status(404).send(false)
 
@@ -214,7 +222,8 @@ router.post('/', async (req, res) => {
     if ((await getRequest(`/courses/${req.body.id}`)).statusCode == 200) return res.sendStatus(400)
 
     req.body.chapters.forEach(chapter => {
-        runSqlCode(`INSERT INTO course_chapters (course_id, chapter_number, chapter_title, chapter_image, chapter_html) VALUES (?, ?, ?, ?, ?)`, [req.body.courseId, chapter.chapterNumber, chapter.title, chapter.image, chapter.html])
+        runSqlCode(`INSERT INTO course_chapters (course_id, chapter_number, chapter_title, chapter_image, chapter_html) VALUES (?, ?, ?, ?, ?)`,
+                   [req.body.courseId, chapter.chapterNumber, chapter.title, chapter.image, chapter.html])
     });
 
     // Insert a new course into courses table
@@ -222,4 +231,8 @@ router.post('/', async (req, res) => {
     res.sendStatus(201)
 })
 
-module.exports = { router, runSqlCode, getImageFromLink }
+module.exports = {
+    router,
+    runSqlCode,
+    getImageFromLink
+}

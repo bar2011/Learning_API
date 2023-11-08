@@ -59,21 +59,13 @@ class Course {
         if (this.currentSection != this.sections.length) return
         
         // Update course twice:
-        // One time to reset the current chapter and another time to move to the next one
-        this.currentSection = 1
-        this.updateCourse()
+        // One time to set the current chapter to full and another time to move to the next one
+        this.updateCourse();
 
+        this.currentSection = 1;
         this.currentChapter = currentChapter + 1;
         this.updateCourse()
         location.href = `./?site=progress&id=${this.id}`
-    }
-
-    reset() {
-        if (confirm("Are you sure you want to reset all progress on this course?")) {
-            this.currentChapter = 1
-            this.currentSection = 1
-            this.updateCourse()
-        }
     }
 
     async generateQuestions() {

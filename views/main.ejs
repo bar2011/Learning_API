@@ -5,11 +5,17 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
     <link rel="stylesheet" href="main.css">
     <title>Learning Project</title>
 </head>
 
 <body style="margin-left: 3%;">
+
+    <div id="course-right-click-menu" style="display: none; position: absolute;">
+        <button id="reset-button" class="button hover-anim" onclick="reset()">reset</button>
+    </div>
+
     <div id="courses-title">
         <p><b>Site courses:</b></p>
     </div>
@@ -17,8 +23,8 @@
         <% courses.forEach(course=> {%>
             <div id="<%= course.course_id %>" class="course"
                 onclick="location.href='./?site=intro&id=<%= course.course_id %>'">
-                <div class="course-image">
-                    <img src="./images/<% let imageUrl = course.course_image %><%= imageUrl.substring(imageUrl.lastIndexOf('/') + 1).trim() %>"
+                <div class="course-image-container">
+                    <img class="course-image" src="./images/<% let imageUrl = course.course_image %><%= imageUrl.substring(imageUrl.lastIndexOf('/') + 1).trim() %>"
                         width="102" height="102">
                 </div>
                 <p class="course-title">
@@ -32,6 +38,57 @@
     </div>
     <button class="button large-button hover-anim" onclick="location.href='./?site=createCourse'">Create your
         own courses!</button>
+    <script>
+        let courseClickedId = "";
+
+        document.onclick = hideMenu;
+        document.oncontextmenu = rightClick;
+
+        function findCourseId(element) {
+            while (element) {
+                if (element.id && element.classList.length > 0 && element.classList[0] == "course") {
+                    return element.id;
+                }
+                element = element.parentNode;
+            }
+            return null;
+        }
+
+        function hideMenu() { 
+            document.getElementById( 
+                "course-right-click-menu").style.display = "none" 
+        }
+        function rightClick(e) {
+            let menu = document.getElementById("course-right-click-menu")
+            
+            if (menu.style.display == "block") {
+                hideMenu();
+            } else {
+                let element = document.elementFromPoint(e.clientX, e.clientY);
+                if (element.classList.length <= 0) return;
+
+                let courseId = findCourseId(element);
+                if (courseId) {
+                    e.preventDefault();
+                    menu.style.display = 'block';
+                    menu.style.left = (e.clientX - 0) + "px";
+                    menu.style.top = (e.clientY - 0) + "px";
+                    courseClickedId = courseId;
+                }
+            }
+        }
+
+        function reset() {
+            $.ajax({
+                type: "PUT",
+                url: `/courses/${courseClickedId}`,
+                data: {
+                    currentChapter: 1,
+                    currentSection: 1
+                }
+            })
+        }
+    </script>
 </body>
 
 </html>
