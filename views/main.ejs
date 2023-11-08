@@ -22,7 +22,11 @@
     <div id="courses-div">
         <% courses.forEach(course=> {%>
             <div id="<%= course.course_id %>" class="course"
-                onclick="location.href='./?site=intro&id=<%= course.course_id %>'">
+                <% if (course.current_chapter == "1") { %>
+                    onclick="location.href='./?site=intro&id=<%= course.course_id %>'">
+                <% } else { %>
+                    onclick="location.href='./?site=progress&id=<%= course.course_id %>'">
+                <% } %>
                 <div class="course-image-container">
                     <img class="course-image" src="./images/<% let imageUrl = course.course_image %><%= imageUrl.substring(imageUrl.lastIndexOf('/') + 1).trim() %>"
                         width="102" height="102">
