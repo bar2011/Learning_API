@@ -21,24 +21,24 @@
     </div>
     <div id="courses-div">
         <% courses.forEach(course=> {%>
-            <div id="<%= course.course_id %>" class="course"
-                <% if (course.current_chapter == "1") { %>
-                    onclick="location.href='./?site=intro&id=<%= course.course_id %>'">
-                <% } else { %>
-                    onclick="location.href='./?site=progress&id=<%= course.course_id %>'">
-                <% } %>
-                <div class="course-image-container">
-                    <img class="course-image" src="./images/<% let imageUrl = course.course_image %><%= imageUrl.substring(imageUrl.lastIndexOf('/') + 1).trim() %>"
-                        width="102" height="102">
-                </div>
-                <p class="course-title">
-                    <%= course.course_title %>
-                </p>
-                <p class="course-description">
-                    <%= course.course_description %>
-                </p>
+        <div id="<%= course.course_id %>" class="course" <% if (course.current_chapter == "1") { %>
+            onclick="location.href='./?site=intro&id=<%= course.course_id %>'">
+            <% } else { %>
+            onclick="location.href='./?site=progress&id=<%= course.course_id %>'">
+            <% } %>
+            <div class="course-image-container">
+                <img class="course-image"
+                    src="./images/<% let imageUrl = course.course_image %><%= imageUrl.substring(imageUrl.lastIndexOf('/') + 1).trim() %>"
+                    width="102" height="102">
             </div>
-            <%}) %>
+            <p class="course-title">
+                <%= course.course_title %>
+            </p>
+            <p class="course-description">
+                <%= course.course_description %>
+            </p>
+        </div>
+        <%}) %>
     </div>
     <button class="button large-button hover-anim" onclick="location.href='./?site=createCourse'">Create your
         own courses!</button>
@@ -58,13 +58,14 @@
             return null;
         }
 
-        function hideMenu() { 
-            document.getElementById( 
-                "course-right-click-menu").style.display = "none" 
+        function hideMenu() {
+            document.getElementById(
+                "course-right-click-menu").style.display = "none"
         }
+
         function rightClick(e) {
             let menu = document.getElementById("course-right-click-menu")
-            
+
             if (menu.style.display == "block") {
                 hideMenu();
             } else {
