@@ -1,28 +1,23 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import bcrypt from "bcrypt";
-import util from "util";
 import fs from "fs";
 import mysql2 from "mysql2";
 import http from "http";
 import axios from "axios";
 
 export const router = express.Router();
-const readFile = util.promisify(fs.readFile);
 
 var connection;
 connectToMySql();
 
 async function connectToMySql() {
-	// read file database.txt and extract database username and password from it
-	let data = (await readFile("./database.txt", "utf8")).split("\r\n");
-	let username = data[0];
-	let password = data[1];
-
 	// Connect to database
 	connection = mysql2.createPool({
 		host: "localhost",
-		user: username,
-		password: password,
+		user: process.env.USER,
+		password: process.env.PASSWORD,
 		database: "sql_learning_api",
 	});
 }
