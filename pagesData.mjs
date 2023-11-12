@@ -1,7 +1,6 @@
-const runSqlCode = require("./routes/courses").runSqlCode;
-const getImageFromLink = require("./routes/courses").getImageFromLink;
+import { runSqlCode, getImageFromLink } from "./routes/courses.mjs";
 
-async function getMainPageData() {
+export async function getMainPageData() {
 	let imageLinks = await runSqlCode("SELECT course_image FROM courses");
 	imageLinks.forEach((link) => {
 		getImageFromLink(link.course_image);
@@ -10,7 +9,7 @@ async function getMainPageData() {
 	return { courses };
 }
 
-async function getIntroData(req) {
+export async function getIntroData(req) {
 	if (parseInt(req.query.id) == undefined) return {};
 	let title = await runSqlCode(
 		"SELECT course_title FROM courses WHERE course_id = ?",
@@ -21,7 +20,7 @@ async function getIntroData(req) {
 	return { title, id: req.query.id };
 }
 
-async function getChapterData(req) {
+export async function getChapterData(req) {
 	if (parseInt(req.query.chapterNumber) == undefined) return {};
 	if (parseInt(req.query.id) == undefined) return {};
 	let chapterData = await runSqlCode(
@@ -38,7 +37,7 @@ async function getChapterData(req) {
 	return { chapterData, courseData };
 }
 
-async function getProgressData(req) {
+export async function getProgressData(req) {
 	let courseData = await runSqlCode(
 		"SELECT course_title, current_chapter FROM courses WHERE course_id = ?",
 		[req.query.id]
@@ -51,10 +50,3 @@ async function getProgressData(req) {
 
 	return { courseData, chapters };
 }
-
-module.exports = {
-	getMainPageData,
-	getIntroData,
-	getChapterData,
-	getProgressData,
-};

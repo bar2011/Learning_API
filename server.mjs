@@ -1,7 +1,12 @@
-const express = require("express");
+import express from "express";
 const app = express();
-const coursesRouter = require("./routes/courses").router;
-const pagesData = require("./pagesData");
+import { router as coursesRouter } from "./routes/courses.mjs";
+import {
+	getMainPageData,
+	getIntroData,
+	getChapterData,
+	getProgressData,
+} from "./pagesData.mjs";
 
 // 200: OK 201: Created 204: No Content
 // 400: Bad req 401: Unauthorized 403: Forbidden 404: Not Found 409: Conflict
@@ -22,18 +27,18 @@ app.set("view engine", "ejs");
 app.get("/", async (req, res) => {
 	switch (req.query.site) {
 		case undefined: {
-			let data = await pagesData.getMainPageData();
+			let data = await getMainPageData();
 			return res.render("main", { courses: data.courses });
 		}
 		case "createCourse": {
 			return res.render("createCourse");
 		}
 		case "intro": {
-			let data = await pagesData.getIntroData(req);
+			let data = await getIntroData(req);
 			return res.render("intro", { title: data.title, id: data.id });
 		}
 		case "chapter": {
-			let data = await pagesData.getChapterData(req);
+			let data = await getChapterData(req);
 			if (data.chapterData == undefined)
 				return res.status(404).render("404");
 			return res.render("chapter", {
@@ -45,7 +50,7 @@ app.get("/", async (req, res) => {
 			});
 		}
 		case "progress": {
-			let data = await pagesData.getProgressData(req);
+			let data = await getProgressData(req);
 
 			if (data.chapters == undefined)
 				return res.status(404).render("404");

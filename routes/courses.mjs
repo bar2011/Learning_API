@@ -1,12 +1,12 @@
-const express = require("express");
-const bcrypt = require("bcrypt");
-const router = express.Router();
-const util = require("util");
-const fs = require("fs");
-const mysql = require("mysql2");
-const http = require("http");
-const axios = require("axios");
+import express from "express";
+import bcrypt from "bcrypt";
+import util from "util";
+import fs from "fs";
+import mysql2 from "mysql2";
+import http from "http";
+import axios from "axios";
 
+export const router = express.Router();
 const readFile = util.promisify(fs.readFile);
 
 var connection;
@@ -14,12 +14,12 @@ connectToMySql();
 
 async function connectToMySql() {
 	// read file database.txt and extract database username and password from it
-	data = (await readFile("./database.txt", "utf8")).split("\r\n");
+	let data = (await readFile("./database.txt", "utf8")).split("\r\n");
 	let username = data[0];
 	let password = data[1];
 
 	// Connect to database
-	connection = mysql.createPool({
+	connection = mysql2.createPool({
 		host: "localhost",
 		user: username,
 		password: password,
@@ -28,7 +28,7 @@ async function connectToMySql() {
 }
 
 // Run MySQL code using a promise rather then a nested callback
-function runSqlCode(sql, args = []) {
+export function runSqlCode(sql, args = []) {
 	return new Promise((resolve, reject) => {
 		connection.query(sql, args, (err, result) => {
 			if (err) throw err;
@@ -64,7 +64,7 @@ async function checkImageLink(imageUrl) {
 	return 200;
 }
 
-async function getImageFromLink(imageUrl) {
+export async function getImageFromLink(imageUrl) {
 	if ((await checkImageLink(imageUrl)) != 200) return 400;
 
 	const imageName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
@@ -289,9 +289,3 @@ router.post("/", async (req, res) => {
 	);
 	res.sendStatus(201);
 });
-
-module.exports = {
-	router,
-	runSqlCode,
-	getImageFromLink,
-};
