@@ -19,18 +19,12 @@ async function connectToMySql() {
     let password = data[1];
 
     // Connect to database
-    connection = mysql.createConnection({
+    connection = mysql.createPool({
         host: "localhost",
         user: username,
-        password: password
+        password: password,
+        database: "sql_learning_api"
     });
-    connection.connect(function (err) {
-        if (err) throw err;
-        console.log("Connected to MySQL database");
-    });
-
-    // Use database sql_learning_api when executing MySQL code
-    runSqlCode("USE sql_learning_api")
 }
 
 // Run MySQL code using a promise rather then a nested callback

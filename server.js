@@ -1,5 +1,4 @@
 const express = require('express')
-const mysql = require('mysql2');
 const app = express()
 const coursesRouter = require('./routes/courses').router
 const runSqlCode = require('./routes/courses').runSqlCode
