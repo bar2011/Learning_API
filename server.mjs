@@ -1,6 +1,8 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 const app = express();
 import { router as coursesRouter } from "./routes/courses.mjs";
+import { checkUserAuthentication, login, signup, errorCodes } from "./userSys.mjs";
 import {
 	getMainPageData,
 	getIntroData,
@@ -18,13 +20,14 @@ $.post('/courses/answers/id', {answer:'1'},function(data,status){
 })
 */
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.static("./public"));
 
 app.set("view engine", "ejs");
 
-app.get("/", async (req, res) => {
+app.get("/", checkUserAuthentication, async (req, res) => {
 	switch (req.query.site) {
 		case undefined: {
 			let data = await getMainPageData();
@@ -52,8 +55,7 @@ app.get("/", async (req, res) => {
 		case "progress": {
 			let data = await getProgressData(req);
 
-			if (data.chapters == undefined)
-				return res.status(404).render("404");
+			if (data.chapters == undefined) return res.redirect("/404");
 
 			return res.render("progress", {
 				courseTitle: data.courseData[0].course_title,
@@ -66,8 +68,43 @@ app.get("/", async (req, res) => {
 			return res.render("outro");
 		}
 		default:
-			return res.status(404).render("404");
+			return res.redirect("/404");
 	}
+});
+
+app.get("/404", (req, res) => {
+	res.status(404).render("404");
+});
+
+app.get("/login", (req, res) => {
+	res.render("login");
+});
+
+app.post("/login", async (req, res) => {
+	let loginStatus = await login(req.body.email, req.body.password);
+	switch (loginStatus.errorCode) {
+		case 0:
+			res.cookie("email", req.body.email)
+			return res.redirect("/");
+		case errorCodes.incorrectEmail:
+			return res.status(401).send("Incorrect Email");
+		case errorCodes.incorrectPassword:
+			return res.status(401).send("Incorrect Password");
+		case errorCodes.serverError:
+			return res.status(500).send("Internal Error");
+	}
+	return res.status(501).send("How.");
+});
+
+app.get("/signup", (req, res) => {
+	res.render("signup");
+});
+
+app.post("/signup", async (req, res) => {
+	let signupStatus = signup(req.body.email, req.body.name, req.body.password);
+	if (signupStatus.errorCode == errorCodes.emailUsed)
+		return res.status(403).send("Email Already Used");
+	return res.redirect("/login");
 });
 
 app.use("/courses", coursesRouter);

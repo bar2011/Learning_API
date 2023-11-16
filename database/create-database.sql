@@ -23,7 +23,7 @@ CREATE TABLE `course_chapters` (
 
 CREATE TABLE `course_answers` (
 	`course_id` INT NOT NULL,
-    `chapter_number` INT NOT NULL,
+    `chapter_number` MEDIUMINT NOT NULL,
 	`question_id` VARCHAR(16) NOT NULL,
 	`answer_hash` VARCHAR(60) NOT NULL,
     PRIMARY KEY (`course_id`, `chapter_number`, `question_id`)
@@ -31,8 +31,23 @@ CREATE TABLE `course_answers` (
 
 CREATE TABLE `course_options` (
 	`course_id` INT NOT NULL,
-    `chapter_number` INT NOT NULL,
+    `chapter_number` MEDIUMINT NOT NULL,
 	`question_id` VARCHAR(16) NOT NULL,
 	`question_option` VARCHAR(60) NOT NULL,
     PRIMARY KEY (`course_id`, `chapter_number`, `question_id`)
+);
+
+CREATE TABLE `user_crad` (
+    `email` VARCHAR(64) NOT NULL,
+    `username` VARCHAR(32) NOT NULL,
+    `password_hash` VARCHAR(60) NOT NULL,
+    PRIMARY KEY (`email`)
+);
+
+CREATE TABLE `user_progress` (
+	`user_email` INT NOT NULL,
+    `course_id` INT NOT NULL,
+    `chapter_number` MEDIUMINT NOT NULL,
+    `current_section` MEDIUMINT UNSIGNED DEFAULT 1 NOT NULL,
+    PRIMARY KEY (`user_email`)
 );
