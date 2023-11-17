@@ -14,19 +14,25 @@
     <div class="screen">
       <div class="screen__content">
         <form class="login" action="/login" method="POST">
-          <% if (messages.error != undefined) { %>
+          <% if (messages.errorCode == 4) { %>
           <p style="color: red;"><%= messages.error %></p>
           <% } %>
           <div class="login__field">
             <i class="login__icon fas fa-envelope"></i>
             <input type="email" name="email" class="login__input" placeholder="Email" required>
+            <% if (messages.errorCode == 1) { %>
+            <div class="error"><%= messages.error %></div>
+            <% } %>
           </div>
           <div class="login__field">
             <i class="login__icon fas fa-lock"></i>
             <input type="password" name="password" class="login__input" placeholder="Password" required>
+            <% if (messages.errorCode == 2) { %>
+            <div class="error"><%= messages.error %></div>
+            <% } %>
           </div>
           <button class="button login__submit">
-            <input type="submit" value="Log In Now" class="button__text"/>
+            <input type="submit" value="Log In Now" class="button__text" />
             <i class="button__icon fas fa-chevron-right"></i>
           </button>
           <div class="login__field">

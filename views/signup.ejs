@@ -34,7 +34,7 @@
     <div class="screen">
       <div class="screen__content">
         <form class="signup" action="/signup" method="POST">
-          <% if (messages.error != undefined) { %>
+          <% if (messages.errorCode == 4) { %>
           <p style="color: red;"><%= messages.error %></p>
           <% } %>
           <div class="signup__field">
@@ -44,10 +44,16 @@
           <div class="signup__field">
             <i class="signup__icon fas fa-envelope"></i>
             <input type="email" name="email" class="signup__input" placeholder="Email" required>
+            <% if (messages.errorCode == 3) { %>
+            <div class="error"><%= messages.error %></div>
+            <% } %>
           </div>
           <div class="signup__field">
             <i class="signup__icon fas fa-lock"></i>
             <input type="password" name="password" class="signup__input" placeholder="Password" required>
+            <% if (messages.errorCode == 2) { %>
+            <div class="error"><%= messages.error %></div>
+            <% } %>
           </div>
           <button class="button signup__submit">
             <input type="submit" value="Sign Up Now" class="button__text" />

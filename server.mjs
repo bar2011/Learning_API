@@ -93,19 +93,34 @@ app.post("/login", async (req, res) => {
 			res.cookie("email", req.body.email);
 			return res.redirect("/");
 		case errorCodes.incorrectEmail:
-			return res
-				.status(401)
-				.render("login", { messages: { error: "Incorrect Email" } });
+			return res.status(401).render("login", {
+				messages: {
+					errorCode: errorCodes.incorrectEmail,
+					error: "Incorrect Email",
+				},
+			});
 		case errorCodes.incorrectPassword:
-			return res
-				.status(401)
-				.render("login", { messages: { error: "Incorrect Password" } });
+			return res.status(401).render("login", {
+				messages: {
+					errorCode: errorCodes.incorrectPassword,
+					error: "Incorrect Password",
+				},
+			});
 		case errorCodes.serverError:
-			return res
-				.status(500)
-				.render("login", { messages: { error: "Internal Error" } });
+			return res.status(500).render("login", {
+				messages: {
+					errorCode: errorCodes.serverError,
+					error: "Internal Error",
+				},
+			});
+		default:
+			return res.status(501).render("login", {
+				messages: {
+					errorCode: errorCodes.serverError,
+					error: "Internal Error",
+				},
+			});
 	}
-	return res.status(501).send("How.");
 });
 
 app.get("/signup", checkUserNotAuthenticated, (req, res) => {
@@ -113,15 +128,28 @@ app.get("/signup", checkUserNotAuthenticated, (req, res) => {
 });
 
 app.post("/signup", async (req, res) => {
+	if (req.body.password.length < 4) {
+		return res
+			.status(400)
+			.render("signup", {
+				messages: {
+					errorCode: errorCodes.incorrectPassword,
+					error: "Password needs to be at least 4 characters long",
+				},
+			});
+	}
 	let signupStatus = await signup(
 		req.body.email,
 		req.body.username,
 		req.body.password
 	);
 	if (signupStatus.errorCode == errorCodes.emailUsed)
-		return res
-			.status(403)
-			.render("signup", { messages: { error: "Email Already Used" } });
+		return res.status(403).render("signup", {
+			messages: {
+				errorCode: errorCodes.emailUsed,
+				error: "Email Already Used",
+			},
+		});
 	return res.redirect("/login");
 });
 

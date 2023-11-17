@@ -113,6 +113,15 @@ body {
 	color: #7875b5;
 }
 
+.error {
+	background: none;
+	font-weight: 700;
+    padding-top: 3px;
+	width: 75%;
+    color: rgb(253, 38, 38);
+	font-size: 12px;
+}
+
 .login__input,
 .signup__input {
 	border: none;
