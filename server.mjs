@@ -2,7 +2,12 @@ import express from "express";
 import cookieParser from "cookie-parser";
 const app = express();
 import { router as coursesRouter } from "./routes/courses.mjs";
-import { checkUserAuthentication, login, signup, errorCodes } from "./userSys.mjs";
+import {
+	checkUserAuthentication,
+	login,
+	signup,
+	errorCodes,
+} from "./userSys.mjs";
 import {
 	getMainPageData,
 	getIntroData,
@@ -77,33 +82,41 @@ app.get("/404", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-	res.render("login");
+	res.render("login", { messages: {} });
 });
 
 app.post("/login", async (req, res) => {
 	let loginStatus = await login(req.body.email, req.body.password);
 	switch (loginStatus.errorCode) {
 		case 0:
-			res.cookie("email", req.body.email)
+			res.cookie("email", req.body.email);
 			return res.redirect("/");
 		case errorCodes.incorrectEmail:
-			return res.status(401).send("Incorrect Email");
+			return res
+				.status(401)
+				.render("login", { messages: { error: "Incorrect Email" } });
 		case errorCodes.incorrectPassword:
-			return res.status(401).send("Incorrect Password");
+			return res
+				.status(401)
+				.render("login", { messages: { error: "Incorrect Password" } });
 		case errorCodes.serverError:
-			return res.status(500).send("Internal Error");
+			return res
+				.status(500)
+				.render("login", { messages: { error: "Internal Error" } });
 	}
 	return res.status(501).send("How.");
 });
 
 app.get("/signup", (req, res) => {
-	res.render("signup");
+	res.render("signup", { messages: {} });
 });
 
 app.post("/signup", async (req, res) => {
-	let signupStatus = signup(req.body.email, req.body.name, req.body.password);
+	let signupStatus = await signup(req.body.email, req.body.name, req.body.password);
 	if (signupStatus.errorCode == errorCodes.emailUsed)
-		return res.status(403).send("Email Already Used");
+		return res
+			.status(403)
+			.render("signup", { messages: { error: "Email Already Used" } });
 	return res.redirect("/login");
 });
 

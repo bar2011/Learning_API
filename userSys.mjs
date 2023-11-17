@@ -31,9 +31,10 @@ export async function login(email, password) {
 }
 
 export async function signup(email, username, password) {
-	let checkEmail = runSqlCode("SELECT email FROM user_crad WHERE email = ?", [
-		email,
-	]);
+	let checkEmail = await runSqlCode(
+		"SELECT email FROM user_crad WHERE email = ?",
+		[email]
+	);
 
 	if (checkEmail.length > 0) return { errorCode: errorCodes.emailUsed };
 
@@ -44,5 +45,5 @@ export async function signup(email, username, password) {
 		hashedPassword,
 	]);
 
-    return { errorCode: 0 };
+	return { errorCode: 0 };
 }
