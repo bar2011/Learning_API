@@ -8,13 +8,22 @@ export const errorCodes = {
 	serverError: 4,
 };
 
-export function checkUserAuthentication(req, res, next) {
+export function checkUserAuthenticated(req, res, next) {
 	let cookie = req.cookies.email;
 	if (cookie === undefined) {
-		res.redirect("/login");
+		return res.redirect("/login");
 	}
 	next();
 }
+
+export function checkUserNotAuthenticated(req, res, next) {
+	let cookie = req.cookies.email;
+	if (cookie !== undefined) {
+		return res.redirect("/");
+	}
+	next();
+}
+
 export async function login(email, password) {
 	let userData = await runSqlCode(
 		"SELECT email, password_hash FROM user_crad WHERE email = ?",

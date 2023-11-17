@@ -3,7 +3,8 @@ import cookieParser from "cookie-parser";
 const app = express();
 import { router as coursesRouter } from "./routes/courses.mjs";
 import {
-	checkUserAuthentication,
+	checkUserAuthenticated,
+	checkUserNotAuthenticated,
 	login,
 	signup,
 	errorCodes,
@@ -32,7 +33,7 @@ app.use(express.static("./public"));
 
 app.set("view engine", "ejs");
 
-app.get("/", checkUserAuthentication, async (req, res) => {
+app.get("/", checkUserAuthenticated, async (req, res) => {
 	switch (req.query.site) {
 		case undefined: {
 			let data = await getMainPageData();
@@ -81,7 +82,7 @@ app.get("/404", (req, res) => {
 	res.status(404).render("404");
 });
 
-app.get("/login", (req, res) => {
+app.get("/login", checkUserNotAuthenticated, (req, res) => {
 	res.render("login", { messages: {} });
 });
 
@@ -107,12 +108,16 @@ app.post("/login", async (req, res) => {
 	return res.status(501).send("How.");
 });
 
-app.get("/signup", (req, res) => {
+app.get("/signup", checkUserNotAuthenticated, (req, res) => {
 	res.render("signup", { messages: {} });
 });
 
 app.post("/signup", async (req, res) => {
-	let signupStatus = await signup(req.body.email, req.body.name, req.body.password);
+	let signupStatus = await signup(
+		req.body.email,
+		req.body.name,
+		req.body.password
+	);
 	if (signupStatus.errorCode == errorCodes.emailUsed)
 		return res
 			.status(403)
