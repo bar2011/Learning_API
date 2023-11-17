@@ -1,16 +1,47 @@
-<h1>Login</h1>
-<form action="/login" method="POST">
-  <% if (messages.error != undefined) { %>
-   <p style="color: red;"><%= messages.error %></p>
-  <% } %>
-  <div>
-    <label for="email">Email</label>
-    <input type="email" id="email" name="email" required>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://kit.fontawesome.com/481432da79.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../userSys.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="screen">
+      <div class="screen__content">
+        <form class="login" action="/login" method="POST">
+          <% if (messages.error != undefined) { %>
+          <p style="color: red;"><%= messages.error %></p>
+          <% } %>
+          <div class="login__field">
+            <i class="login__icon fas fa-envelope"></i>
+            <input type="email" name="email" class="login__input" placeholder="Email" required>
+          </div>
+          <div class="login__field">
+            <i class="login__icon fas fa-lock"></i>
+            <input type="password" name="password" class="login__input" placeholder="Password" required>
+          </div>
+          <button class="button login__submit">
+            <input type="submit" value="Log In Now" class="button__text"/>
+            <i class="button__icon fas fa-chevron-right"></i>
+          </button>
+          <div class="login__field">
+            <div class="move" onclick="location.href='/signup'">Sign up instead</div>
+          </div>
+        </form>
+      </div>
+      <div class="screen__background">
+        <span class="screen__background__shape screen__background__shape4"></span>
+        <span class="screen__background__shape screen__background__shape3"></span>
+        <span class="screen__background__shape screen__background__shape2"></span>
+        <span class="screen__background__shape screen__background__shape1"></span>
+      </div>
+    </div>
   </div>
-  <div>
-    <label for="password">Password</label>
-    <input type="password" id="password" name="password" required>
-  </div>
-  <button type="submit">Login</button>
-</form>
-<a href="/signup">Sign Up</a>
+</body>
+
+</html>

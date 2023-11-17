@@ -1,4 +1,4 @@
-<h1>Sign Up</h1>
+<!-- <h1>Sign Up</h1>
 <form action="/signup" method="POST">
   <% if (messages.error != undefined) { %>
    <p style="color: red;"><%= messages.error %></p>
@@ -17,4 +17,55 @@
   </div>
   <button type="submit">Sign Up</button>
 </form>
-<a href="/login">Login</a>
+<a href="/signup">signup</a> -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://kit.fontawesome.com/481432da79.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="../userSys.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="screen">
+      <div class="screen__content">
+        <form class="signup" action="/signup" method="POST">
+          <% if (messages.error != undefined) { %>
+          <p style="color: red;"><%= messages.error %></p>
+          <% } %>
+          <div class="signup__field">
+            <i class="signup__icon fas fa-user"></i>
+            <input type="text" name="username" class="signup__input" placeholder="Username" required>
+          </div>
+          <div class="signup__field">
+            <i class="signup__icon fas fa-envelope"></i>
+            <input type="email" name="email" class="signup__input" placeholder="Email" required>
+          </div>
+          <div class="signup__field">
+            <i class="signup__icon fas fa-lock"></i>
+            <input type="password" name="password" class="signup__input" placeholder="Password" required>
+          </div>
+          <button class="button signup__submit">
+            <input type="submit" value="Sign Up Now" class="button__text" />
+            <i class="button__icon fas fa-chevron-right"></i>
+          </button>
+          <div class="signup__field">
+            <div class="move" onclick="location.href='/login'">Log in instead</div>
+          </div>
+        </form>
+      </div>
+      <div class="screen__background">
+        <span class="screen__background__shape screen__background__shape4"></span>
+        <span class="screen__background__shape screen__background__shape3"></span>
+        <span class="screen__background__shape screen__background__shape2"></span>
+        <span class="screen__background__shape screen__background__shape1"></span>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

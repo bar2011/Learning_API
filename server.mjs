@@ -115,7 +115,7 @@ app.get("/signup", checkUserNotAuthenticated, (req, res) => {
 app.post("/signup", async (req, res) => {
 	let signupStatus = await signup(
 		req.body.email,
-		req.body.name,
+		req.body.username,
 		req.body.password
 	);
 	if (signupStatus.errorCode == errorCodes.emailUsed)
