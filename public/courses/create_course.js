@@ -290,7 +290,7 @@ function sendCourseToServer(chapterObjects, imageUrl) {
 			title: title,
 			description: description,
 			image: imageUrl,
-			chapters: chapterObjects,
+			chapters: JSON.stringify(chapterObjects),
 		},
 		success: function () {
 			swal("Course Created Successfully", "", "success");
@@ -390,11 +390,15 @@ function createQuestionHtml(
 
 	// Send question to server
 	options.push(answerText);
-	$.post("/courses/options/", {
-		course_id: id,
-		chapterNumber: chapterNumber,
-		question_id: questionNumber,
-		options_list: shuffle(options),
+	$.ajax({
+		url: "/courses/options/",
+		type: "POST",
+		data: {
+			course_id: id,
+			chapterNumber: chapterNumber,
+			question_id: questionNumber,
+			optionsList: shuffle(options),
+		},
 	});
 	$.post("/courses/answers/", {
 		course_id: id,

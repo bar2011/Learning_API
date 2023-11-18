@@ -92,12 +92,12 @@ router.post("/options", async (req, res) => {
 		return res.sendStatus(400);
 
 	// Insert each option into course_options table
-	for (let i = 1; i <= req.body.options_list.length; i++) {
+	for (let i = 1; i <= req.body["optionsList[]"].length; i++) {
 		runSqlCode("INSERT INTO course_options VALUES (?, ?, ?, ?)", [
 			req.body.course_id,
 			req.body.chapterNumber,
 			req.body.question_id + i,
-			req.body.options_list[i - 1],
+			req.body["optionsList[]"][i - 1],
 		]);
 	}
 	res.sendStatus(201);
@@ -264,7 +264,7 @@ router.post("/", async (req, res) => {
 	if ((await getRequest(`/courses/${req.body.id}`)).statusCode == 200)
 		return res.sendStatus(400);
 
-	req.body.chapters.forEach((chapter) => {
+	JSON.parse(req.body.chapters).forEach((chapter) => {
 		runSqlCode(
 			`INSERT INTO course_chapters (course_id, chapter_number, chapter_title, chapter_image, chapter_html) VALUES (?, ?, ?, ?, ?)`,
 			[
