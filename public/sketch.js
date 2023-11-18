@@ -33,6 +33,8 @@ class Course {
 			if (currentInputNode.checked) chosenOption = option;
 		});
 
+		if (chosenOption == null) return false;
+
 		let isCorrectAnswer = false;
 		await $.ajax({
 			type: "POST",
