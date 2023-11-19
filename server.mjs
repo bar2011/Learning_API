@@ -8,6 +8,7 @@ import {
 	login,
 	signup,
 	errorCodes,
+	getJWT,
 } from "./userSys.mjs";
 import {
 	getMainPageData,
@@ -90,7 +91,7 @@ app.post("/login", async (req, res) => {
 	let loginStatus = await login(req.body.email, req.body.password);
 	switch (loginStatus.errorCode) {
 		case 0:
-			res.cookie("email", req.body.email);
+			res.cookie("jwt", await getJWT(req.body.email));
 			return res.redirect("/");
 		case errorCodes.incorrectEmail:
 			return res.status(401).render("login", {
@@ -129,14 +130,12 @@ app.get("/signup", checkUserNotAuthenticated, (req, res) => {
 
 app.post("/signup", async (req, res) => {
 	if (req.body.password.length < 4) {
-		return res
-			.status(400)
-			.render("signup", {
-				messages: {
-					errorCode: errorCodes.incorrectPassword,
-					error: "Password needs to be at least 4 characters long",
-				},
-			});
+		return res.status(400).render("signup", {
+			messages: {
+				errorCode: errorCodes.incorrectPassword,
+				error: "Password needs to be at least 4 characters long",
+			},
+		});
 	}
 	let signupStatus = await signup(
 		req.body.email,
