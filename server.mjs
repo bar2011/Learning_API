@@ -54,7 +54,7 @@ app.get("/", checkUserAuthenticated, async (req, res) => {
 				chapterHtml: data.chapterData[0].chapter_html,
 				title: data.chapterData[0].chapter_title,
 				id: req.query.id,
-				chapterProgress: data.chapterData[0].current_section,
+				currentSection: data.chapterData[0].current_section,
 				currentChapter: data.courseData[0].current_chapter,
 			});
 		}

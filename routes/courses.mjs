@@ -83,11 +83,9 @@ export async function getImageFromLink(imageUrl) {
 router.post("/options", async (req, res) => {
 	// If options with same course and question ID exist than the server can't create another set of options with the same ID
 	if (
-		(
-			await getRequest(
-				`/courses/options/${req.body.course_id}?chapterNumber=${req.body.chapterNumber}&questionId=${req.body.question_id}`
-			)
-		).statusCode == 200
+		(await getRequest(
+			`/courses/options/${req.body.course_id}?chapterNumber=${req.body.chapterNumber}&questionId=${req.body.question_id}`
+		).statusCode) == 200
 	)
 		return res.sendStatus(400);
 

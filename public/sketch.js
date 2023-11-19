@@ -70,9 +70,12 @@ class Course {
 		// One time to set the current chapter to full and another time to move to the next one
 		this.updateCourse();
 
-		this.currentSection = 1;
-		this.currentChapter = currentChapter + 1;
-		this.updateCourse();
+		if (currentChapter == this.currentChapter) {
+			this.currentSection = 1;
+			this.currentChapter = currentChapter + 1;
+			this.updateCourse();
+		}
+
 		location.href = `./?site=progress&id=${this.id}`;
 	}
 
