@@ -1,5 +1,5 @@
 import { runSqlCode } from "./routes/courses.mjs";
-import { encodeUserData } from "./jwt.mjs";
+import { encodeUserData, decode } from "./jwt.mjs";
 import bcrypt from "bcrypt";
 
 export const errorCodes = {
@@ -9,11 +9,23 @@ export const errorCodes = {
 	serverError: 4,
 };
 
-export function checkUserAuthenticated(req, res, next) {
-	let cookie = req.cookies.jwt;
-	if (cookie === undefined) {
+export async function checkUserAuthenticated(req, res, next) {
+	let jsonWebToken = req.cookies.jwt;
+	if (jsonWebToken === undefined) return res.redirect("/login");
+	let payload = undefined;
+	try {
+		payload = await decode(jsonWebToken).payload;
+	} catch (error) {
+		console.error("Unable to decode JWT cookie");
+		res.clearCookie("jwt");
 		return res.redirect("/login");
 	}
+	if (payload.sub == undefined || payload.name == undefined);
+	let checkPayloadData = await runSqlCode(
+		"SELECT email FROM user_crad WHERE email = ? AND username = ?",
+		[payload.sub, payload.name]
+	);
+	if (checkPayloadData.length <= 0) return res.redirect("/login");
 	next();
 }
 
@@ -62,7 +74,9 @@ export async function getJWT(email) {
 	let username = await runSqlCode(
 		"SELECT username FROM user_crad WHERE email = ?",
 		[email]
-	)[0].username;
+	)
+	if (username.length <= 0) return "-1.-1.-1"
+	username = username[0].username;
 	let jwt = encodeUserData(email, username);
 	return jwt;
 }

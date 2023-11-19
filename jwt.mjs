@@ -11,7 +11,7 @@ function encode(header, payload) {
 	const payloadEnc = b64(JSON.stringify(payload));
 	return `${headerEnc}.${payloadEnc}`;
 }
-function decode(jwt) {
+export function decode(jwt) {
 	const [headerB64, payloadB64] = jwt.split(".");
 	const headerStr = Buffer.from(headerB64, "base64").toString("ascii");
 	const payloadStr = Buffer.from(payloadB64, "base64").toString("ascii");
