@@ -1,3 +1,5 @@
+import { createHmac } from "crypto";
+
 // URL safe variant of Base-64
 function b64(str) {
 	return Buffer.from(str)
@@ -6,29 +8,41 @@ function b64(str) {
 		.replace(/\+/g, "-")
 		.replace(/\//g, "_");
 }
-function encode(header, payload) {
-	const headerEnc = b64(JSON.stringify(header));
-	const payloadEnc = b64(JSON.stringify(payload));
-	return `${headerEnc}.${payloadEnc}`;
+function utf8(text, inputEncoding) {
+	const buffer = Buffer.from(text, inputEncoding);
+	return Array.from(buffer);
 }
-export function decode(jwt) {
-	const [headerB64, payloadB64] = jwt.split(".");
-	const headerStr = Buffer.from(headerB64, "base64").toString("ascii");
-	const payloadStr = Buffer.from(payloadB64, "base64").toString("ascii");
-	return {
-		header: JSON.parse(headerStr),
-		payload: JSON.parse(payloadStr),
-	};
+function encode(header, payload, secret) {
+	const headerEnc = b64(utf8(JSON.stringify(header)));
+	const payloadEnc = b64(utf8(JSON.stringify(payload)));
+	const signature = b64(
+		createHmac(header.alg, secret)
+			.update(`${headerEnc}.${payloadEnc}`)
+			.digest("base64")
+	);
+	return `${headerEnc}.${payloadEnc}.${signature}`;
+}
+export function verify(jwt, secret) {
+	const [headerB64, payloadB64, signatureB64] = jwt.split(".");
+	const header = JSON.parse(
+		Buffer.from(headerB64, "base64").toString("ascii")
+	);
+	const recreatedSignature = b64(
+		createHmac(header.alg, secret)
+			.update(`${headerB64}.${payloadB64}`)
+			.digest("base64")
+	);
+	return recreatedSignature == signatureB64;
 }
 
-export function encodeUserData(email, username) {
+export function encodeUserData(email, username, secret) {
 	const header = {
-		alg: "none",
+		alg: "sha256",
 	};
 	const payload = {
 		sub: email,
 		name: username,
 	};
 
-	return encode(header, payload);
+	return encode(header, payload, secret);
 }
