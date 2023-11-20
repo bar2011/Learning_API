@@ -16,7 +16,8 @@
 </head>
 
 <body style="margin-left: 3%;">
-    <button class="button large-button hover-anim" onclick="location.href='../'">&#8617; Go Back to Main Page</button>
+    <%- include('header.ejs') %>
+    
     <div style="height: 630px;">
         <textarea placeholder="Enter Course Creation Text" id="editing" spellcheck="false"
             oninput="update(this.value); sync_scroll(this);" onscroll="sync_scroll(this);"

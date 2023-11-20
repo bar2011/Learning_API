@@ -1,13 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.0.js"></script>
+    <script type="text/javascript" src="./confetti.js"></script>
     <title>Completed Course</title>
     <link rel="stylesheet" href="main.css">
+    <style>
+        #confetti {
+            background: #fff;
+            height: 100%;
+            left: 0px;
+            position: fixed;
+            top: 0px;
+            width: 100%;
+            z-index: -1;
+        }
+    </style>
 </head>
-<body>
-    <h1>Congratulations!<br>You completed the course</h1>
-    <button class="button large-button hover-anim" onclick="location.href='../'">&#8617; Go Back to Main Page</button>
+
+<body style="margin-left: 3%;">
+    <%- include('header.ejs') %>
+    <div id="confetti"></div>
+    <h1 style="text-align:center; left: 35%; position: absolute; top: 50%;">Congratulations!<br>You completed the course</h1>
 </body>
+
 </html>

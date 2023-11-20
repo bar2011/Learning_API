@@ -9,7 +9,9 @@
   <title><%= title %></title>
 </head>
 
-<body>
+<body style="margin-left: 3%;">
+  <%- include('header.ejs') %>
+  
   <%- chapterHtml %>
   <script>
     let chapterSection = <%= currentSection %>;

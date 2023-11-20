@@ -77,7 +77,7 @@ function convertTextToHTML() {
 
 	title = courseData[0][0];
 	if (
-		!/^([\w\d\s\"\(\)\?]|(?:\\[\'\}\{}]))+$/.test(title) ||
+		!/^([\w\d\s\(\)\?]|(?:\\[\'\"\}\{}]))+$/.test(title) ||
 		title.length < 3 ||
 		title.length > 30
 	)
@@ -89,7 +89,7 @@ function convertTextToHTML() {
 
 	description = courseData[1][0];
 	if (
-		(!/^([\w\d\s\"\(\)\?]|(?:\\[\'\}\{}]))+$/.test(description) ||
+		(!/^([\w\d\s\"\(\)\?]|(?:\\[\'\}\{\,]))+$/.test(description) ||
 			description.length < 15 ||
 			description.length > 250) &&
 		description.length > 0
