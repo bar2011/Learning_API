@@ -1,3 +1,7 @@
+const textRegexp = new RegExp(/^[^"]+$/);
+const stringRegexp = new RegExp(/(?<=[,\s]")([^"])*(?="[,\s])/g);
+const stringKeywordRegexp = new RegExp(/"([^"])*"/g);
+
 let inputDiv;
 let inputtedText = "";
 let id;
@@ -7,7 +11,7 @@ let description;
 Prism.languages["course"] = {
 	keyword: /([qtopd]|cd){\s|\s}([qtopd]|cd)|\s{c}\s/,
 	property: /,\s/,
-	string: /["'](?:\\.|[^\\"'\r\n])*["']/,
+	string: stringKeywordRegexp,
 };
 
 // code taken from https://codepen.io/WebCoder49/pen/dyNyraq
@@ -70,33 +74,28 @@ function convertTextToHTML() {
 			"error"
 		);
 
-	courseData = courseData[0].substring(0, courseData[0].match(/\s}cd/).index);
-	courseData = [
-		...courseData.matchAll(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/g),
-	];
+	// Increment index by 2 so the program would be able to detect whitespace after course image 
+	courseData = courseData[0].substring(0, courseData[0].match(/\s}cd/).index+2);
+	courseData = [...courseData.matchAll(stringRegexp)];
 
 	title = courseData[0][0];
-	if (
-		!/^([\w\d\s\(\)\?]|(?:\\[\'\"\}\{}]))+$/.test(title) ||
-		title.length < 3 ||
-		title.length > 30
-	)
+	if (!textRegexp.test(title) || title.length < 3 || title.length > 30)
 		return swal(
 			"The title you entered is INVALID",
-			"Your title needs to be between 3 and 30 characters.\nThe only special characters that are allowed are the following:\n\", \\{, \\}, (, ), ?, \\'",
+			'Your title needs to be between 3 and 30 characters.\nIt also cannot contain the character "',
 			"error"
 		);
 
 	description = courseData[1][0];
 	if (
-		(!/^([\w\d\s\"\(\)\?]|(?:\\[\'\}\{\,]))+$/.test(description) ||
+		(!textRegexp.test(description) ||
 			description.length < 15 ||
 			description.length > 250) &&
 		description.length > 0
 	)
 		return swal(
 			"The description you entered is INVALID",
-			"Your description needs to be between 15 and 250 characters.\nThe only special characters that are allowed are the following:\n\", \\{, \\}, (, ), ?, \\'",
+			'Your description needs to be between 15 and 250 characters.\nIt also cannot contain the character "',
 			"error"
 		);
 
@@ -169,23 +168,22 @@ function createChapter(chapterText, chapterNumber) {
 		);
 		return null;
 	}
+	// Increment index by 2 so it would be able to detect whitespace after chapter image
 	chapterData = chapterData[0].substring(
 		0,
-		chapterData[0].match(/\s}d/).index
+		chapterData[0].match(/\s}d/).index+2
 	);
-	chapterData = [
-		...chapterData.matchAll(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/g),
-	];
+	chapterData = [...chapterData.matchAll(stringRegexp)];
 
 	chapterObject.title = chapterData[0][0];
 	if (
-		!/^([\w\d\s\"\(\)\?]|(?:\\[\'\}\{}]))+$/.test(chapterObject.title) ||
+		!textRegexp.test(chapterObject.title) ||
 		chapterObject.title.length < 3 ||
 		chapterObject.title.length > 30
 	) {
 		swal(
 			`The title you entered for chapter ${chapterNumber} is INVALID`,
-			"Your title needs to be between 3 and 30 characters.\nThe only special characters that are allowed are the following:\n\", \\{, \\}, (, ), ?, \\'",
+			'Your title needs to be between 3 and 30 characters.\nIt also cannot contain the character "',
 			"error"
 		);
 		return null;
@@ -255,9 +253,9 @@ function createChapterSectionFromText(
 	switch (sectionText[1]) {
 		case "t": {
 			// Create text chapter section
-			let textDiv = createTextDiv(sectionText[0]);
+			let textElement = createTextElement(sectionText[0]);
 			chapterSection = finishCreationOfChapterSection(
-				textDiv,
+				textElement,
 				sectionNumber
 			);
 			break;
@@ -299,10 +297,10 @@ function sendCourseToServer(chapterObjects, imageUrl) {
 }
 
 // `mainDiv` is the text or question div
-function finishCreationOfChapterSection(mainDiv, sectionNumber) {
+function finishCreationOfChapterSection(mainElement, sectionNumber) {
 	let chapterSection = document.createElement("div");
 	chapterSection.className = "section " + sectionNumber++;
-	chapterSection.appendChild(mainDiv);
+	chapterSection.appendChild(mainElement);
 
 	// Add button for continuing in the chapter
 	chapterSection.appendChild(
@@ -314,30 +312,29 @@ function finishCreationOfChapterSection(mainDiv, sectionNumber) {
 	return chapterSection;
 }
 
-function createTextDiv(sectionText) {
-	let textDiv = document.createElement("div");
+function createTextElement(sectionText) {
+	let textElement = document.createElement("div");
 	// Get the text content from `sectionText` by finding the first "string" in the text following the t{ declaration
-	let text = sectionText.match(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/);
+	let text = sectionText.match(stringRegexp);
 	if (text == null) return;
 	text = text[0];
 
-	textDiv.textContent = text;
-	return textDiv;
+	textElement.textContent = text;
+
+	return textElement;
 }
 
 // Using chapterNumber and questionNumber only for assigning id to elements and for database
 function getQuestionDiv(sectionText, chapterNumber, questionNumber) {
 	// Extract question, answer and options from `sectionText` using regexp
-	let questionText = sectionText.match(
-		/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/
-	);
+	let questionText = sectionText.match(stringRegexp);
 	let answerText = sectionText
 		.substring(sectionText.indexOf("{c}"))
-		.match(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/);
+		.match(stringRegexp);
 	let options = [
 		...sectionText
 			.substring(sectionText.indexOf("o{ "), sectionText.indexOf(" }o"))
-			.matchAll(/(?<=['"])(?:\\.|[^\\"',{\r\n])*(?=['"])/g),
+			.matchAll(stringRegexp),
 	];
 	if (questionText == null || answerText == null || options == null)
 		return null;
@@ -431,19 +428,19 @@ function shuffle(array) {
 	return array;
 }
 /*
-cd{ 'Course name', 'Course Description', 'https://courseimage.png' }cd
+cd{ "Course name", "Course Description", "https://courseimage.png" }cd
 p{
-    d{ 'Name Of Chapter', 'https://chapterimage.png' }d
-    t{ 'This is some text that I put here' }t
-    q{ 'This is a qquesiotn' {c} 'Hello'
-        o{ 'cat',
-           'dog',
-           'house as',
-           'notebook jf',
-           'bot tle',
-           'monitor',
-           'flag',
-           'U בSA' }o
+    d{ "Name Of Chapter", "https://chapterimage.png" }d
+    t{ "This is some text that I put here" }t
+    q{ "This is a qquesiotn" {c} "Hello"
+        o{ "cat",
+           "dog",
+           "house as",
+           "notebook jf",
+           "bot tle",
+           "monitor",
+           "flag",
+           "U בSA" }o
     }q
 }p
 */
