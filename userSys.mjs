@@ -14,8 +14,17 @@ export const errorCodes = {
 export async function checkUserAuthenticated(req, res, next) {
 	let jsonWebToken = req.cookies.jwt;
 	if (jsonWebToken === undefined) return res.redirect("/login");
-	if (!verify(jsonWebToken, process.env.JWT_SECRET))
+
+	// Redirect even if cannot parse JSON
+	try {
+		if (!verify(jsonWebToken, process.env.JWT_SECRET)) {
+			res.clearCookie("jwt");
+			return res.redirect("/login");
+		}
+	} catch (error) {
+		res.clearCookie("jwt");
 		return res.redirect("/login");
+	}
 	next();
 }
 

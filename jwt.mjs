@@ -24,9 +24,16 @@ function encode(header, payload, secret) {
 }
 export function verify(jwt, secret) {
 	const [headerB64, payloadB64, signatureB64] = jwt.split(".");
+
 	const header = JSON.parse(
 		Buffer.from(headerB64, "base64").toString("ascii")
 	);
+	if (header.alg == undefined) return false;
+	const payload = JSON.parse(
+		Buffer.from(payloadB64, "base64").toString("ascii")
+	);
+	if (payload.sub == undefined || payload.name == undefined) return false;
+
 	const recreatedSignature = b64(
 		createHmac(header.alg, secret)
 			.update(`${headerB64}.${payloadB64}`)
@@ -45,4 +52,17 @@ export function encodeUserData(email, username, secret) {
 	};
 
 	return encode(header, payload, secret);
+}
+
+// Assumes that data was verified
+export function getUserDataFromJWT(jwt) {
+	const [headerB64, payloadB64, signatureB64] = jwt.split(".");
+	const header = JSON.parse(
+		Buffer.from(headerB64, "base64").toString("ascii")
+	);
+	const payload = JSON.parse(
+		Buffer.from(payloadB64, "base64").toString("ascii")
+	);
+
+	return { payload, header };
 }
