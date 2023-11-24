@@ -9,9 +9,9 @@ let title;
 let description;
 
 Prism.languages["course"] = {
+	string: stringKeywordRegexp,
 	keyword: /([qtopd]|cd){\s|\s}([qtopd]|cd)|\s{c}\s/,
 	property: /,\s/,
-	string: stringKeywordRegexp,
 };
 
 // code taken from https://codepen.io/WebCoder49/pen/dyNyraq
