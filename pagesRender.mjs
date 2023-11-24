@@ -1,3 +1,4 @@
+import { getUserDataFromJWT } from "./jwt.mjs";
 import { runSqlCode, getImageFromLink } from "./routes/courses.mjs";
 
 async function getMainPageData() {
@@ -22,6 +23,21 @@ async function getIntroData(req) {
 	);
 	if (title.length <= 0) return {};
 	title = title[0].course_title;
+
+	// Check if user already entered course
+	// If not, create a new row for the specific user for the specific course
+	const email = getUserDataFromJWT(req.cookies.jwt).payload.sub;
+	const courseData = await runSqlCode(
+		"SELECT chapter_number, current_section FROM user_progress WHERE user_email = ? AND course_id = ?",
+		[email, req.query.id]
+	);
+	if (courseData.length <= 0) {
+		await runSqlCode(
+			"INSERT user_progress VALUE (?, ?, DEFAULT, DEFAULT)",
+			[email, req.query.id]
+		);
+	}
+
 	return { title, id: req.query.id };
 }
 
