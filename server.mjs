@@ -2,14 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 const app = express();
 import { router as coursesRouter } from "./routes/courses.mjs";
-import {
-	checkUserAuthenticated,
-	checkUserNotAuthenticated,
-	login,
-	signup,
-	errorCodes,
-	getJWT,
-} from "./userSys.mjs";
+import * as userSystem from "./userSys.mjs";
 import * as pagesRender from "./pagesRender.mjs";
 
 // 200: OK 201: Created 204: No Content
@@ -29,7 +22,7 @@ app.use(express.static("./public"));
 
 app.set("view engine", "ejs");
 
-app.get("/", checkUserAuthenticated, async (req, res) => {
+app.get("/", userSystem.checkUserAuthenticated, async (req, res) => {
 	switch (req.query.site) {
 		case undefined: {
 			return await pagesRender.renderMainPage(req, res);
@@ -58,48 +51,48 @@ app.get("/404", (req, res) => {
 	res.status(404).render("404");
 });
 
-app.get("/login", checkUserNotAuthenticated, (req, res) => {
+app.get("/login", userSystem.checkUserNotAuthenticated, (req, res) => {
 	res.render("login", { messages: {} });
 });
 
 app.post("/login", async (req, res) => {
-	let loginStatus = await login(req.body.email, req.body.password);
+	let loginStatus = await userSystem.login(req.body.email, req.body.password);
 	switch (loginStatus.errorCode) {
 		case 0:
-			res.cookie("jwt", await getJWT(req.body.email));
+			res.cookie("jwt", await userSystem.getJWT(req.body.email));
 			return res.redirect("/");
-		case errorCodes.incorrectEmail:
+		case userSystem.errorCodes.incorrectEmail:
 			return res.status(401).render("login", {
 				messages: {
-					errorCode: errorCodes.incorrectEmail,
+					errorCode: userSystem.errorCodes.incorrectEmail,
 					error: "Incorrect Email",
 				},
 			});
-		case errorCodes.incorrectPassword:
+		case userSystem.errorCodes.incorrectPassword:
 			return res.status(401).render("login", {
 				messages: {
-					errorCode: errorCodes.incorrectPassword,
+					errorCode: userSystem.errorCodes.incorrectPassword,
 					error: "Incorrect Password",
 				},
 			});
-		case errorCodes.serverError:
+		case userSystem.errorCodes.serverError:
 			return res.status(500).render("login", {
 				messages: {
-					errorCode: errorCodes.serverError,
+					errorCode: userSystem.errorCodes.serverError,
 					error: "Internal Error",
 				},
 			});
 		default:
 			return res.status(501).render("login", {
 				messages: {
-					errorCode: errorCodes.serverError,
+					errorCode: userSystem.errorCodes.serverError,
 					error: "Internal Error",
 				},
 			});
 	}
 });
 
-app.get("/signup", checkUserNotAuthenticated, (req, res) => {
+app.get("/signup", userSystem.checkUserNotAuthenticated, (req, res) => {
 	res.render("signup", { messages: {} });
 });
 
@@ -107,20 +100,20 @@ app.post("/signup", async (req, res) => {
 	if (req.body.password.length < 4) {
 		return res.status(400).render("signup", {
 			messages: {
-				errorCode: errorCodes.incorrectPassword,
+				errorCode: userSystem.errorCodes.incorrectPassword,
 				error: "Password needs to be at least 4 characters long",
 			},
 		});
 	}
-	let signupStatus = await signup(
+	let signupStatus = await userSystem.signup(
 		req.body.email,
 		req.body.username,
 		req.body.password
 	);
-	if (signupStatus.errorCode == errorCodes.emailUsed)
+	if (signupStatus.errorCode == userSystem.errorCodes.emailUsed)
 		return res.status(403).render("signup", {
 			messages: {
-				errorCode: errorCodes.emailUsed,
+				errorCode: userSystem.errorCodes.emailUsed,
 				error: "Email Already Used",
 			},
 		});
