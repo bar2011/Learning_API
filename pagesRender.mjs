@@ -49,18 +49,21 @@ export async function renderIntroPage(req, res) {
 async function getChapterData(req) {
 	if (parseInt(req.query.chapterNumber) == undefined) return {};
 	if (parseInt(req.query.id) == undefined) return {};
-	let chapterData = await runSqlCode(
-		"SELECT chapter_html, chapter_title, current_section FROM course_chapters WHERE course_id = ? AND chapter_number = ?",
-		[req.query.id, req.query.chapterNumber]
+
+	const email = getUserDataFromJWT(req.cookies.jwt).payload.sub;
+	const userData = await runSqlCode(
+		"SELECT current_chapter, current_section FROM user_progress WHERE user_email = ? AND course_id = ?",
+		[email, req.query.id]
 	);
-	let courseData = await runSqlCode(
-		"SELECT current_chapter FROM courses WHERE course_id = ?",
+
+	const chapterData = await runSqlCode(
+		"SELECT chapter_html, chapter_title FROM course_chapters WHERE course_id = ?",
 		[req.query.id]
 	);
 
-	if (courseData.length < 1 || chapterData.length < 1) return {};
+	if (userData.length < 1 || chapterData.length < 1) return {};
 
-	return { chapterData, courseData };
+	return { chapterData, userData };
 }
 
 export async function renderChapterPage(req, res) {
@@ -70,23 +73,30 @@ export async function renderChapterPage(req, res) {
 		chapterHtml: data.chapterData[0].chapter_html,
 		title: data.chapterData[0].chapter_title,
 		id: req.query.id,
-		currentSection: data.chapterData[0].current_section,
-		currentChapter: data.courseData[0].current_chapter,
+		currentSection: data.userData[0].current_section,
+		currentChapter: data.userData[0].current_chapter,
 	});
 }
 
 async function getProgressData(req) {
-	let courseData = await runSqlCode(
-		"SELECT course_title, current_chapter FROM courses WHERE course_id = ?",
+	const email = getUserDataFromJWT(req.cookies.jwt).payload.sub;
+	const userData = await runSqlCode(
+		"SELECT current_chapter FROM user_progress WHERE course_id = ? AND user_email = ?",
+		[req.query.id, email]
+	);
+
+	const courseData = await runSqlCode(
+		"SELECT course_title FROM courses WHERE course_id = ?",
 		[req.query.id]
 	);
 	const chapters = await runSqlCode(
 		"SELECT chapter_title, chapter_image FROM course_chapters WHERE course_id = ?",
 		[req.query.id]
 	);
-	if (courseData.length <= 0 || chapters.length <= 0) return {};
+	if (userData.length <= 0 || courseData.length <= 0 || chapters.length <= 0)
+		return {};
 
-	return { courseData, chapters };
+	return { courseData, chapters, userData };
 }
 
 export async function renderProgressPage(req, res) {
@@ -96,7 +106,7 @@ export async function renderProgressPage(req, res) {
 
 	return res.render("progress", {
 		courseTitle: data.courseData[0].course_title,
-		currentChapter: data.courseData[0].current_chapter,
+		currentChapter: data.userData[0].current_chapter,
 		chapters: data.chapters,
 		id: req.query.id,
 	});
