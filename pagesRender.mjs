@@ -28,7 +28,7 @@ async function getIntroData(req) {
 	// If not, create a new row for the specific user for the specific course
 	const email = getUserDataFromJWT(req.cookies.jwt).payload.sub;
 	const courseData = await runSqlCode(
-		"SELECT chapter_number, current_section FROM user_progress WHERE user_email = ? AND course_id = ?",
+		"SELECT current_chapter, current_section FROM user_progress WHERE user_email = ? AND course_id = ?",
 		[email, req.query.id]
 	);
 	if (courseData.length <= 0) {

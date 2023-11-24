@@ -47,7 +47,7 @@ CREATE TABLE `user_crad` (
 CREATE TABLE `user_progress` (
 	`user_email` VARCHAR(64) NOT NULL,
     `course_id` INT NOT NULL,
-    `chapter_number` MEDIUMINT UNSIGNED DEFAULT 1 NOT NULL,
+    `current_chapter` MEDIUMINT UNSIGNED DEFAULT 1 NOT NULL,
     `current_section` MEDIUMINT UNSIGNED DEFAULT 1 NOT NULL,
     PRIMARY KEY (`user_email`, `course_id`)
 );
