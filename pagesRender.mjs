@@ -56,12 +56,14 @@ async function getChapterData(req) {
 		[email, req.query.id]
 	);
 
+	if (userData.length <= 0) return {};
+
 	const chapterData = await runSqlCode(
-		"SELECT chapter_html, chapter_title FROM course_chapters WHERE course_id = ?",
-		[req.query.id]
+		"SELECT chapter_html, chapter_title FROM course_chapters WHERE course_id = ? AND chapter_number = ?",
+		[req.query.id, req.query.chapterNumber]
 	);
 
-	if (userData.length < 1 || chapterData.length < 1) return {};
+	if (chapterData.length <= 0) return {};
 
 	return { chapterData, userData };
 }
@@ -73,6 +75,7 @@ export async function renderChapterPage(req, res) {
 		chapterHtml: data.chapterData[0].chapter_html,
 		title: data.chapterData[0].chapter_title,
 		id: req.query.id,
+		chapterNumber: req.query.chapterNumber,
 		currentSection: data.userData[0].current_section,
 		currentChapter: data.userData[0].current_chapter,
 	});

@@ -20,11 +20,11 @@ class Course {
 			if (!(await this.checkQuestion())) return;
 		}
 		this.currentSection++;
-		this.showDivs();
+		this.showSections();
 		this.updateCourse();
 	}
 
-	async checkQuestion() {
+	getChosenOption() {
 		let chosenOption = null;
 		const questionFieldset =
 			this.sections[this.currentSection - 1].childNodes[0];
@@ -32,7 +32,11 @@ class Course {
 			let currentInputNode = option.childNodes[0];
 			if (currentInputNode.checked) chosenOption = option;
 		});
+		return chosenOption;
+	}
 
+	async checkQuestion() {
+		let chosenOption = this.getChosenOption();
 		if (chosenOption == null) return false;
 
 		let isCorrectAnswer = false;
@@ -52,19 +56,27 @@ class Course {
 		return isCorrectAnswer;
 	}
 
-	showDivs() {
+	showSections(chapterNumber) {
+		if (this.currentChapter > chapterNumber) {
+			this.showSectionsUpTo(this.sections.length);
+		} else {
+			this.showSectionsUpTo(this.currentSection);
+		}
+	}
+
+	showSectionsUpTo(currentSection) {
 		for (let i = 0; i < this.sections.length; i++) {
-			if (this.sections[i].classList[1] <= this.currentSection)
+			if (this.sections[i].classList[1] <= currentSection)
 				this.sections[i].style.display = "block";
-			if (this.sections[i].classList[1] < this.currentSection)
+			if (this.sections[i].classList[1] < currentSection)
 				this.continueButtons[i].style.display = "none";
 		}
 	}
 
 	async finishLevel(currentChapter) {
-		// check that user is in last div and that this function is executed for this chapter
+		// check that user is in last section and that this function isn't executed from a chapter it shouldn't
 		if (currentChapter > this.currentChapter) return;
-		if (this.currentSection != this.sections.length) return;
+		if (currentChapter == this.currentChapter && this.currentSection != this.sections.length) return;
 
 		// Update course twice:
 		// One time to set the current chapter to full and another time to move to the next one
@@ -85,8 +97,8 @@ class Course {
 			questionNumber <= this.questions.length;
 			questionNumber++
 		) {
-			let questionDiv = this.questions[questionNumber - 1];
-			let questionChildDivs = questionDiv.getElementsByTagName("label");
+			let questionSection = this.questions[questionNumber - 1];
+			let shownOptions = questionSection.getElementsByTagName("label");
 			let options;
 			await $.ajax({
 				type: "GET",
@@ -100,41 +112,41 @@ class Course {
 				return item.question_option;
 			});
 
-			this.generateQuestion(questionChildDivs, questionNumber, options);
+			this.generateQuestion(shownOptions, questionNumber, options);
 		}
 		this.updateCourse();
 	}
 
-	async generateQuestion(questionChildDivs, questionNumber, options) {
+	async generateQuestion(shownOptions, questionNumber, allOptions) {
 		var shownOptions = [];
 		// Add the actual answer to shownOptions array
-		for (let i = 0; i < options.length; i++) {
+		for (let i = 0; i < allOptions.length; i++) {
 			let isAnswer;
 			await $.ajax({
 				type: "POST",
 				url: `/courses/answers/${this.id}?currentChapter=${this.currentChapter}&questionId=${questionNumber}`,
-				data: { option: options[i] },
+				data: { option: allOptions[i] },
 				success: function (data, status) {
 					isAnswer = data;
 				},
 			});
 			if (isAnswer === true) {
-				shownOptions.push(options[i]);
-				options.splice(i, 1);
+				shownOptions.push(allOptions[i]);
+				allOptions.splice(i, 1);
 				break;
 			}
 		}
 		// Add 3 more random options
-		options = this.shuffle(options);
+		allOptions = this.shuffle(allOptions);
 		for (let i = 0; i < 3; i++) {
-			shownOptions.push(options[i]);
+			shownOptions.push(allOptions[i]);
 		}
 
 		shownOptions = this.shuffle(shownOptions);
 
 		// Add the final options to the screen
 		for (let i = 0; i < shownOptions.length; i++) {
-			questionChildDivs[i].childNodes[1].innerHTML = shownOptions[i];
+			shownOptions[i].childNodes[1].innerHTML = shownOptions[i];
 		}
 	}
 

@@ -7,7 +7,6 @@ CREATE TABLE `courses` (
 	`course_title` VARCHAR(32) NOT NULL,
     `course_description` VARCHAR(256) DEFAULT NULL,
     `course_image` VARCHAR(256) NOT NULL,
-    `current_chapter` MEDIUMINT UNSIGNED DEFAULT 1 NOT NULL,
     PRIMARY KEY (`course_id`)
 );
 
@@ -16,7 +15,6 @@ CREATE TABLE `course_chapters` (
     `chapter_number` MEDIUMINT NOT NULL,
     `chapter_title` VARCHAR(32) NOT NULL,
     `chapter_image` VARCHAR(256) NOT NULL,
-    `current_section` MEDIUMINT UNSIGNED DEFAULT 1 NOT NULL,
     `chapter_html` MEDIUMTEXT NOT NULL,
     PRIMARY KEY (`course_id`, `chapter_number`)
 );

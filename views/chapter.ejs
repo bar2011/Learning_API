@@ -20,8 +20,8 @@
     let chapterSection = <%= currentSection %>;
     let currentChapter = <%= currentChapter %>;
     let id = <%= id %>;
-    let course = new Course(chapterSection, currentChapter, id)
-    course.showDivs()
+    let course = new Course(chapterSection, currentChapter, id);
+    course.showSections(<%= chapterNumber %>);
   </script>
 </body>
 
