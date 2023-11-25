@@ -32,25 +32,27 @@ class Course {
 			let currentInputNode = option.childNodes[0];
 			if (currentInputNode.checked) chosenOption = option;
 		});
-		return chosenOption;
+		return { chosenOption, questionFieldset };
 	}
 
 	async checkQuestion() {
-		let chosenOption = this.getChosenOption();
-		if (chosenOption == null) return false;
+		let chosenOptionData = this.getChosenOption();
+		if (chosenOptionData.chosenOption == undefined) return false;
 
 		let isCorrectAnswer = false;
 		await $.ajax({
 			type: "POST",
-			url: `/courses/answers/${this.id}?currentChapter=${this.currentChapter}&questionId=${questionFieldset.id}`,
-			data: { option: chosenOption.childNodes[1].innerHTML },
+			url: `/courses/answers/${this.id}?currentChapter=${this.currentChapter}&questionId=${chosenOptionData.questionFieldset.id}`,
+			data: {
+				option: chosenOptionData.chosenOption.childNodes[1].innerHTML,
+			},
 			success: function (data, status) {
 				isCorrectAnswer = data;
 			},
 			async: "false",
 		});
 		if (!isCorrectAnswer) {
-			chosenOption.childNodes[0].checked = false;
+			chosenOptionData.chosenOption.childNodes[0].checked = false;
 			await this.generateQuestions();
 		}
 		return isCorrectAnswer;
@@ -76,7 +78,11 @@ class Course {
 	async finishLevel(currentChapter) {
 		// check that user is in last section and that this function isn't executed from a chapter it shouldn't
 		if (currentChapter > this.currentChapter) return;
-		if (currentChapter == this.currentChapter && this.currentSection != this.sections.length) return;
+		if (
+			currentChapter == this.currentChapter &&
+			this.currentSection != this.sections.length
+		)
+			return;
 
 		// Update course twice:
 		// One time to set the current chapter to full and another time to move to the next one
@@ -118,8 +124,8 @@ class Course {
 	}
 
 	async generateQuestion(shownOptions, questionNumber, allOptions) {
-		var shownOptions = [];
-		// Add the actual answer to shownOptions array
+		let newOptions = [];
+		// Add the actual answer to newOptions array
 		for (let i = 0; i < allOptions.length; i++) {
 			let isAnswer;
 			await $.ajax({
@@ -131,7 +137,7 @@ class Course {
 				},
 			});
 			if (isAnswer === true) {
-				shownOptions.push(allOptions[i]);
+				newOptions.push(allOptions[i]);
 				allOptions.splice(i, 1);
 				break;
 			}
@@ -139,14 +145,14 @@ class Course {
 		// Add 3 more random options
 		allOptions = this.shuffle(allOptions);
 		for (let i = 0; i < 3; i++) {
-			shownOptions.push(allOptions[i]);
+			newOptions.push(allOptions[i]);
 		}
 
-		shownOptions = this.shuffle(shownOptions);
+		newOptions = this.shuffle(newOptions);
 
 		// Add the final options to the screen
-		for (let i = 0; i < shownOptions.length; i++) {
-			shownOptions[i].childNodes[1].innerHTML = shownOptions[i];
+		for (let i = 0; i < newOptions.length; i++) {
+			shownOptions[i].childNodes[1].innerHTML = newOptions[i];
 		}
 	}
 
