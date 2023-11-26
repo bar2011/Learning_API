@@ -32,7 +32,14 @@ export function verify(jwt, secret) {
 	const payload = JSON.parse(
 		Buffer.from(payloadB64, "base64").toString("ascii")
 	);
-	if (payload.sub == undefined || payload.name == undefined) return false;
+	if (
+		payload.sub == undefined ||
+		payload.name == undefined ||
+		payload.exp == undefined ||
+		typeof payload.exp != "string"
+	)
+		return false;
+	if (Date.parse(payload.exp) < new Date()) return false;
 
 	const recreatedSignature = b64(
 		createHmac(header.alg, secret)
@@ -42,13 +49,22 @@ export function verify(jwt, secret) {
 	return recreatedSignature == signatureB64;
 }
 
-export function encodeUserData(email, username, secret) {
+export function encodeUserData(
+	email,
+	username,
+	secret,
+	daysTillExpiration = 7
+) {
+	const expirationTime = new Date();
+	expirationTime.setDate(expirationTime.getDate() + daysTillExpiration);
+
 	const header = {
 		alg: "sha256",
 	};
 	const payload = {
 		sub: email,
 		name: username,
+		exp: expirationTime,
 	};
 
 	return encode(header, payload, secret);
