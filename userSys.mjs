@@ -1,5 +1,5 @@
 import { runSqlCode } from "./routes/courses.mjs";
-import { encodeUserData, verify } from "./jwt.mjs";
+import { encodeUserData, verify, getUserDataFromJWT } from "./jwt.mjs";
 import { config } from "dotenv";
 config();
 import bcrypt from "bcrypt";
@@ -12,7 +12,7 @@ export const errorCodes = {
 };
 
 export async function checkUserAuthenticated(req, res, next) {
-	let jsonWebToken = req.cookies.jwt;
+	const jsonWebToken = req.cookies.jwt;
 	if (jsonWebToken === undefined) return res.redirect("/login");
 
 	// Redirect even if cannot parse JSON
@@ -25,6 +25,18 @@ export async function checkUserAuthenticated(req, res, next) {
 		res.clearCookie("jwt");
 		return res.redirect("/login");
 	}
+
+	// Check if user exists
+	const email = getUserDataFromJWT(jsonWebToken).payload.sub;
+	const username = await runSqlCode(
+		"SELECT username FROM user_crad WHERE email = ?",
+		[email]
+	);
+	if (username == null || username <= 0) {
+		res.clearCookie("jwt");
+		return res.redirect("/login");
+	}
+
 	next();
 }
 
