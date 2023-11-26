@@ -1,4 +1,76 @@
-<button class="button large-button hover-anim" onclick="location.href='/'">Home</button>
-<button class="button large-button hover-anim"
-    onclick="document.cookie='jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC;'; location.reload()">Logout</button>
-<hr style="transform: translateX(-3%) scaleX(106.5%);">
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  header {
+    left: 0;
+    position: absolute;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px 10%;
+    background-color: #272D2F;
+  }
+
+  .space {
+    height: 12vh;
+  }
+
+  .nav__links a {
+    color: #BED9E0;
+  }
+
+  .nav__links a,
+  .logout {
+    text-decoration: none;
+  }
+
+  .nav__links {
+    list-style: none;
+    display: flex;
+  }
+
+  .nav__links li {
+    padding: 0px 20px;
+  }
+
+  .nav__links li a {
+    transition: color 0.3s ease 0s;
+  }
+
+  .nav__links li a:hover {
+    cursor: pointer;
+    color: #E5F4FF;
+  }
+
+  .logout {
+    padding: 9px 25px;
+    color: #091C39;
+    background-color: #BED9E0;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease 0s;
+  }
+
+  .logout:hover {
+    background-color: #E5F4FF;
+  }
+</style>
+<header>
+  <nav>
+    <ul class="nav__links">
+      <li><a href="./">Courses</a></li>
+      <li><a href="./?site=createCourse">Create Course</a></li>
+      <% if (createCourse) { %>
+      <li><a onclick="convertTextToHTML()">Convert Text to HTML</a></li>
+      <% } %>
+    </ul>
+  </nav>
+  <a class="logout" onclick="document.cookie='jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC;'; location.reload()">Logout</a>
+</header>
+<div class="space"></div>

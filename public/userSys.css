@@ -7,10 +7,11 @@
 	margin: 0;
 	padding: 0;
 	font-family: Raleway, sans-serif;
+	--background-color: #80c9dc;
 }
 
 body {
-	background: linear-gradient(90deg, #c7c5f4, #776bcc);
+	background: linear-gradient(90deg, color-mix(in srgb, var(--background-color) 30%, white), color-mix(in srgb, var(--background-color) 45%, white));
 }
 
 .container {
@@ -21,11 +22,11 @@ body {
 }
 
 .screen {
-	background: linear-gradient(90deg, #5d54a4, #7c78b8);
+	background: linear-gradient(90deg, color-mix(in srgb, var(--background-color) 70%, white), color-mix(in srgb, var(--background-color) 75%, white));
 	position: relative;
 	height: 600px;
 	width: 360px;
-	box-shadow: 0px 0px 24px #5c5696;
+	box-shadow: 0px 0px 24px color-mix(in srgb, var(--background-color) 95%, white);
 }
 
 .screen__content {
@@ -62,7 +63,7 @@ body {
 .screen__background__shape2 {
 	height: 220px;
 	width: 220px;
-	background: #6c63ac;
+	background: color-mix(in srgb, var(--background-color) 90%, white);
 	top: -172px;
 	right: 0;
 	border-radius: 32px;
@@ -71,7 +72,7 @@ body {
 .screen__background__shape3 {
 	height: 540px;
 	width: 190px;
-	background: linear-gradient(270deg, #5d54a4, #6a679e);
+	background: linear-gradient(270deg, color-mix(in srgb, var(--background-color) 75%, white), color-mix(in srgb, var(--background-color) 80%, white));
 	top: -24px;
 	right: 0;
 	border-radius: 32px;
@@ -80,7 +81,7 @@ body {
 .screen__background__shape4 {
 	height: 400px;
 	width: 200px;
-	background: #7e7bb9;
+	background: color-mix(in srgb, var(--background-color) 85%, white);
 	top: 420px;
 	right: 50px;
 	border-radius: 60px;
@@ -110,7 +111,7 @@ body {
 .signup__icon {
 	position: absolute;
 	top: 30px;
-	color: #7875b5;
+	color: color-mix(in srgb, var(--background-color) 95%, white);
 }
 
 .error {
@@ -141,7 +142,7 @@ body {
 .signup__input:focus,
 .signup__input:hover {
 	outline: none;
-	border-bottom-color: #6a679e;
+	border-bottom-color: color-mix(in srgb, var(--background-color) 90%, white);
 }
 
 .login__submit,
@@ -157,8 +158,8 @@ body {
 	display: flex;
 	align-items: center;
 	width: 100%;
-	color: #4c489d;
-	box-shadow: 0px 2px 2px #5c5696;
+	color: color-mix(in srgb, var(--background-color) 90%, white);
+	box-shadow: 0px 2px 2px color-mix(in srgb, var(--background-color) 90%, white);
 	cursor: pointer;
 	transition: 0.2s;
 }
@@ -169,14 +170,14 @@ body {
 .signup__submit:active,
 .signup__submit:focus,
 .signup__submit:hover {
-	border-color: #6a679e;
+	border-color: color-mix(in srgb, var(--background-color) 90%, white);
 	outline: none;
 }
 
 .button__icon {
 	font-size: 24px;
 	margin-left: auto;
-	color: #7875b5;
+	color: color-mix(in srgb, var(--background-color) 90%, white);
 }
 
 .button__text {
@@ -184,7 +185,7 @@ body {
     background: none;
     font-size: 16px;
     font-weight: 700;
-	color: #4C489D;
+	color: color-mix(in srgb, var(--background-color) 90%, rgb(75, 108, 160));
 }
 
 .move {
@@ -203,5 +204,5 @@ body {
 .move:hover {
 	outline: none;
 	cursor: pointer;
-	border-bottom-color: #6a679e;
+	border-bottom-color: color-mix(in srgb, var(--background-color) 90%, white);
 }

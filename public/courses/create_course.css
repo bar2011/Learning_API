@@ -5,7 +5,10 @@
     margin-left: 3%; margin-right: 3%;
     border: 0;
     width: 94%;
-    height: 600px;
+    height: 700px;
+    background-color: #E5F4FF;
+    border: 20px solid #E5F4FF;
+    border-radius: 20px;
 }
 
 #editing, #highlighting, #highlighting * {
@@ -19,7 +22,7 @@
 #editing, #highlighting {
     /* In the same place */
     position: absolute;
-    top: 75px;
+    top: 15vh;
     left: 0;
 }
 
@@ -52,6 +55,6 @@
 
 code {
     border-radius: 2px;
-    background-color: #eee;
+    background-color: #E5F4FF;
     color: #111;
 }

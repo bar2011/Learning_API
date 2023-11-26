@@ -16,7 +16,7 @@
 </head>
 
 <body style="margin-left: 3%;">
-    <%- include('header.ejs') %>
+    <%- include('header.ejs', {createCourse: true}) %>
     
     <div style="height: 630px;">
         <textarea placeholder="Enter Course Creation Text" id="editing" spellcheck="false"
@@ -26,8 +26,6 @@
             <code class="language-course" id="highlighting-content"></code>
         </pre>
     </div>
-
-    <button class="button large-button hover-anim" onclick="convertTextToHTML()">Convert HTML</button>
 </body>
 
 </html>

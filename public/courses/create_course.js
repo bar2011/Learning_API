@@ -67,7 +67,7 @@ function convertTextToHTML() {
 
 	// when showing error link to something that looks like documentation but less good
 	let courseData = inputtedText.match(/cd{\s.+/);
-	if (courseData.length <= 0)
+	if (courseData == null || courseData.length <= 0)
 		return swal(
 			"You need to enter course data",
 			"You can use it like so:\ncd{ 'course name', 'course description{optional}', 'course image url' }cd",

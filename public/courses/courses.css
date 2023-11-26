@@ -43,7 +43,7 @@ label input {
 }
 
 label input:checked+span {
-    background-color: #d6d6d6;
+    background-color: #BED9E0;
 }
 
 label input:checked+span:before {
@@ -59,7 +59,7 @@ label span {
 }
 
 label span:hover {
-    background-color: #d6d6d6;
+    background-color: #BED9E0;
 }
 
 label span:before {
@@ -76,12 +76,14 @@ label span:before {
 }
 
 fieldset {
+    margin-top: 3%;
+    padding-left: 20px;
     border: 2px solid var(--background-color);
     border-top: 60px solid var(--background-color);
     border-radius: 20px;
     background-color: var(--background-color);
 
-    --background-color: #e6e6e6
+    --background-color: #E5F4FF
 }
 
 /* end of question css */

@@ -1,95 +1,121 @@
-@font-face {
-    font-family: "Roboto";
-    src: url(./images/Roboto-Bold.ttf);
+@import url("https://fonts.googleapis.com/css?family=Ubuntu:700|Space Grotesk:400");
+body {
+	background-color: #bed9e0;
+    color: #091C39;
+	font-family: "Space Grotesk";
+	font-weight: 400;
+}
+h1,
+h2,
+h3,
+h4,
+h5 {
+	font-family: "Ubuntu";
+	font-weight: 700;
+}
+html {
+	font-size: 100%;
+} /* 16px */
+h1 {
+	font-size: 4.21rem; /* 67.36px */
+}
+h2 {
+	font-size: 3.158rem; /* 50.56px */
+}
+h3 {
+	font-size: 2.369rem; /* 37.92px */
+}
+h4 {
+	font-size: 1.777rem; /* 28.48px */
+	margin-bottom: 5px; margin-top: 5px;
+}
+h5 {
+	font-size: 1.333rem; /* 21.28px */
+	margin-bottom: 5px;
+}
+small {
+	font-size: 0.75rem; /* 12px */
+}
+
+button {
+    margin-left: 10px;
+	font-size: medium;
+	position: relative;
+	background-color: #3B3B54;
+    filter: brightness(0.8);
+	color: #E5F4FF;
+	border: none;
+	border-radius: 5px;
 }
 
 #reset-button {
-    font-size: medium;
-    font-weight: 550;
-    padding-top: 6px;
-    padding-bottom: 6px;
-    padding-left: 10px;
-    padding-right: 10px;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	padding-left: 10px;
+	padding-right: 10px;
 }
 
 #courses-div,
 #progress-div {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 200px 200px 200px 200px 200px 200px;
-    margin-bottom: 5%;
+	width: 100%;
+	display: grid;
+	grid-template-columns: 25% 25% 25% 25%;
+	margin-bottom: 5%;
 }
 
 #courses-title {
-    height: 3vh;
-    margin-bottom: 2%;
-    font-size: xx-large;
-    font-family: "Roboto";
+	margin-bottom: 2%;
 }
 
 .course-image-container,
 .chapter-image {
-    border: 1px solid #bcbcbc;
-    box-shadow: 1px 2px #dfdfdf;
-    border-radius: 9.09%;
-    margin-top: 10px;
-    margin-right: 10px;
-    padding: 22.72%;
+	border: 5px solid #3b3b54;
+	border-radius: 9.09%;
+	padding-left: 3%;
+	padding-right: 3%;
+	padding-top: 20%;
+	padding-bottom: 20%;
 
-    transition: border-color 0.5s ease-out;
+	transition: border-color 0.5s ease-out;
 
-    &:hover {
-        border-color: #2a2a2a;
-        cursor: pointer;
-    }
+	&:hover {
+		border-color: #2b2b3e;
+		cursor: pointer;
+	}
 }
 
 .course,
 .chapter {
-    text-align: center;
-}
-
-.course-title,
-.chapter-title {
-    font-size: larger;
-}
-
-.course-description {
-    font-size: 14px;
+	margin-right: 5%;
+	margin-left: 5%;
+	padding: 10%;
+	border: #e5f4ff 10px solid;
+	border-radius: 15px;
+	background-color: #e5f4ff;
+	text-align: center;
 }
 
 .hover-anim {
-    transition: background-color 0.5s ease-out;
+	transition: background-color 0.5s ease-out;
 
-    &:hover {
-        background-color: #333333;
-        cursor: pointer;
-    }
-}
-
-.button {
-    position: relative;
-    background-color: #111111;
-    color: #e9e9e9;
-    border: none;
-    border-radius: 5px;
+	&:hover {
+		background-color: #333333;
+		cursor: pointer;
+	}
 }
 
 .large-button {
-    font-size: larger;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    padding-left: 20px;
-    padding-right: 20px;
+	padding-top: 15px;
+	padding-bottom: 15px;
+	padding-left: 20px;
+	padding-right: 20px;
 }
 
 .small-button {
-    font-size: large;
-    font-weight: 900;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    padding-left: 15px;
-    padding-right: 15px;
-    margin-top: 15px;
-    margin-bottom: 15px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 15px;
+	padding-right: 15px;
+	margin-top: 15px;
+	margin-bottom: 15px;
 }

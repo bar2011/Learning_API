@@ -11,7 +11,7 @@
 </head>
 
 <body style="margin-left: 3%;">
-  <%- include('header.ejs') %>
+  <%- include('header.ejs', {createCourse: false}) %>
   <div id="progress-div">
     <% for( let chapter = 0; chapter < chapters.length; chapter++ ) { %>
     <div class="chapter" <% let onclick = "" %> <% if (chapter <= currentChapter) { %>
@@ -22,9 +22,9 @@
           src="./images/<% let imageUrl = chapters[chapter].chapter_image %><%= imageUrl.substring(imageUrl.lastIndexOf('/') + 1).trim() %>"
           width="102" height="102">
       </div>
-      <p class="chapter-title">
+      <h5 class="chapter-title" style="margin-top: 3%;">
         <%= chapters[chapter].chapter_title %>
-      </p>
+      </h5>
     </div>
     <% } %>
   </div>
@@ -52,7 +52,7 @@
       chapters[i].onclick = () => {
         location.href = `./?site=chapter&id=<%= id %>&chapterNumber=${i + 1}`
       }
-      chapters[i].style.color = "#86B049";
+      chapters[i].style.color = "#1ab26b";
     }
 
     // Adds closed lock image to not open chapters

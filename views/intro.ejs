@@ -13,8 +13,10 @@
 </head>
 
 <body class="intro">
+    <%- include('header.ejs', {createCourse: false}) %>
+
     <h1>Welcome to <%= title %>!</h1>
-    <h2>Press here to start →<button class="button small-button hover-anim"
+    <h2>Press here to start →<button class="small-button hover-anim"
             onclick="location.href='./?site=chapter&id=<%= id %>&chapterNumber=1'">Continue</button></h2>
 </body>
 
