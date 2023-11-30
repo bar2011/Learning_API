@@ -1,24 +1,24 @@
 @import url("https://fonts.googleapis.com/css?family=Ubuntu:700|Space Grotesk:400");
 body {
-    color: var(--text-color);
+	color: var(--text-color);
 	background-color: var(--background-color);
 	font-family: "Space Grotesk";
 	font-weight: 400;
-	
-	--light-text-color: #091C39;
-	--light-background-color: #BED9E0;
-	--light-primary-color: #E5F4FF;
-	--light-secondary-color: #272D2F;
-	--light-accent-color: #3B3B54;
-	--light-sucess-color: #1AB26B;
-	
-	--dark-text-color: #C6D9F6;
+
+	--light-text-color: #091c39;
+	--light-background-color: #bed9e0;
+	--light-primary-color: #e5f4ff;
+	--light-secondary-color: #272d2f;
+	--light-accent-color: #3b3b54;
+	--light-sucess-color: #1ab26b;
+
+	--dark-text-color: #c6d9f6;
 	--dark-background-color: #254555;
-	--dark-primary-color: #000F1A;
-	--dark-secondary-color: #D0D6D8;
-	--dark-accent-color: #ABABC4;
-	--dark-sucess-color: #A1FF8A;
-	
+	--dark-primary-color: #000f1a;
+	--dark-secondary-color: #d0d6d8;
+	--dark-accent-color: #ababc4;
+	--dark-sucess-color: #a1ff8a;
+
 	--text-color: var(--light-text-color);
 	--background-color: var(--light-background-color);
 	--primary-color: var(--light-primary-color);
@@ -48,7 +48,8 @@ h3 {
 }
 h4 {
 	font-size: 1.777rem; /* 28.48px */
-	margin-bottom: 5px; margin-top: 5px;
+	margin-bottom: 5px;
+	margin-top: 5px;
 }
 h5 {
 	font-size: 1.333rem; /* 21.28px */
@@ -59,11 +60,11 @@ small {
 }
 
 button {
-    margin-left: 10px;
+	margin-left: 10px;
 	font-size: medium;
 	position: relative;
 	background-color: var(--accent-color);
-    filter: brightness(0.8);
+	filter: brightness(0.8);
 	color: var(--primary-color);
 	border: none;
 	border-radius: 5px;
@@ -140,7 +141,6 @@ button {
 	margin-top: 15px;
 	margin-bottom: 15px;
 }
-
 
 #context-menu {
 	background-color: color-mix(in srgb, var(--background-color) 90%, black);

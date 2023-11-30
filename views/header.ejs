@@ -25,7 +25,7 @@
   }
 
   .nav__links a,
-  .logout {
+  .nav__button {
     text-decoration: none;
   }
 
@@ -47,7 +47,7 @@
     color: var(--primary-color);
   }
 
-  .logout {
+  .nav__button {
     padding: 9px 25px;
     color: var(--text-color);
     background-color: var(--background-color);
@@ -57,10 +57,32 @@
     transition: all 0.3s ease 0s;
   }
 
-  .logout:hover {
+  .nav__button:hover {
     background-color: var(--primary-color);
   }
 </style>
+<script>
+  const body = document.querySelector("body");
+
+  let isLightMode = true;
+
+  function changeMode() {
+    const changeModeButton = document.getElementById("change-mode");
+    const otherModeName = (isLightMode) ? "dark" : "light";
+    const currentModeName = (isLightMode) ? "light" : "dark";
+
+    body.style.setProperty("--text-color", `var(--${otherModeName}-text-color)`);
+    body.style.setProperty("--background-color", `var(--${otherModeName}-background-color)`);
+    body.style.setProperty("--primary-color", `var(--${otherModeName}-primary-color)`);
+    body.style.setProperty("--secondary-color", `var(--${otherModeName}-secondary-color)`);
+    body.style.setProperty("--accent-color", `var(--${otherModeName}-accent-color)`);
+    body.style.setProperty("--success-color", `var(--${otherModeName}-success-color)`);
+
+    changeModeButton.innerHTML = `${currentModeName} mode`
+
+    isLightMode = !isLightMode;
+  }
+</script>
 <header>
   <nav>
     <ul class="nav__links">
@@ -71,6 +93,9 @@
       <% } %>
     </ul>
   </nav>
-  <a class="logout" onclick="document.cookie='jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC;'; location.reload()">Logout</a>
+  <div>
+    <a class="nav__button" id="change-mode" onclick="changeMode()">Dark Mode</a>
+    <a class="nav__button" onclick="document.cookie='jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC;'; location.reload()">Logout</a>
+  </div>
 </header>
 <div class="space"></div>
