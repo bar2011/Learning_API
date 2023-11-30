@@ -35,7 +35,7 @@ export function runSqlCode(sql, args = []) {
 
 function getRequest(url) {
 	return new Promise((resolve, reject) => {
-		http.get(`http://localhost:3000${url}`, (resp) => {
+		http.get(`http://${process.env.PORT}:3000${url}`, (resp) => {
 			resolve(resp);
 		});
 	});
