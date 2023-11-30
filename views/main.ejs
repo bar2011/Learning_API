@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/481432da79.js" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
     <link rel="stylesheet" href="main.css">
     <title>Learning Project</title>
@@ -13,8 +14,11 @@
 <body style="margin-left: 3%;">
     <%- include('header.ejs', {createCourse: false}) %>
 
-    <div id="course-right-click-menu" style="display: none; position: absolute;">
-        <button id="reset-button" class="hover-anim" onclick="reset()">reset</button>
+    <div id="context-menu" style="display: none; position: absolute;">
+        <div class="context-menu-option" onclick="reset()">
+            <i class="fa-solid fa-arrow-rotate-left"></i>
+            <div class="context-menu-option-text">Reset</div>
+        </div>
     </div>
 
     <div id="courses-title">
@@ -55,11 +59,11 @@
 
         function hideMenu() {
             document.getElementById(
-                "course-right-click-menu").style.display = "none"
+                "context-menu").style.display = "none"
         }
 
         function rightClick(e) {
-            let menu = document.getElementById("course-right-click-menu")
+            let menu = document.getElementById("context-menu")
 
             if (menu.style.display == "block") {
                 hideMenu();
