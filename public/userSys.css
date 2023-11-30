@@ -54,7 +54,7 @@ body {
 .screen__background__shape1 {
 	height: 520px;
 	width: 520px;
-	background: #fff;
+	background: white;
 	top: -50px;
 	right: 120px;
 	border-radius: 0 72px 0 0;
@@ -147,7 +147,7 @@ body {
 
 .login__submit,
 .signup__submit {
-	background: #fff;
+	background: white;
 	font-size: 14px;
 	margin-top: 30px;
 	padding: 16px 20px;

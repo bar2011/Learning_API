@@ -1,9 +1,30 @@
 @import url("https://fonts.googleapis.com/css?family=Ubuntu:700|Space Grotesk:400");
 body {
-	background-color: #bed9e0;
-    color: #091C39;
+    color: var(--text-color);
+	background-color: var(--background-color);
 	font-family: "Space Grotesk";
 	font-weight: 400;
+	
+	--light-text-color: #091C39;
+	--light-background-color: #BED9E0;
+	--light-primary-color: #E5F4FF;
+	--light-secondary-color: #272D2F;
+	--light-accent-color: #3B3B54;
+	--light-sucess-color: #1AB26B;
+	
+	--dark-text-color: #C6D9F6;
+	--dark-background-color: #254555;
+	--dark-primary-color: #000F1A;
+	--dark-secondary-color: #D0D6D8;
+	--dark-accent-color: #ABABC4;
+	--dark-sucess-color: #A1FF8A;
+	
+	--text-color: var(--light-text-color);
+	--background-color: var(--light-background-color);
+	--primary-color: var(--light-primary-color);
+	--secondary-color: var(--light-secondary-color);
+	--accent-color: var(--light-accent-color);
+	--sucess-color: var(--light-sucess-color);
 }
 h1,
 h2,
@@ -41,9 +62,9 @@ button {
     margin-left: 10px;
 	font-size: medium;
 	position: relative;
-	background-color: #3B3B54;
+	background-color: var(--accent-color);
     filter: brightness(0.8);
-	color: #E5F4FF;
+	color: var(--primary-color);
 	border: none;
 	border-radius: 5px;
 }
@@ -69,7 +90,7 @@ button {
 
 .course-image-container,
 .chapter-image {
-	border: 5px solid #3b3b54;
+	border: 5px solid var(--accent-color);
 	border-radius: 9.09%;
 	padding-left: 3%;
 	padding-right: 3%;
@@ -79,7 +100,7 @@ button {
 	transition: border-color 0.5s ease-out;
 
 	&:hover {
-		border-color: #2b2b3e;
+		border-color: color-mix(in srgb, var(--accent-color) 80%, black);
 		cursor: pointer;
 	}
 }
@@ -89,9 +110,9 @@ button {
 	margin-right: 5%;
 	margin-left: 5%;
 	padding: 10%;
-	border: #e5f4ff 10px solid;
+	border: var(--primary-color) 10px solid;
 	border-radius: 15px;
-	background-color: #e5f4ff;
+	background-color: var(--primary-color);
 	text-align: center;
 }
 
