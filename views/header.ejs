@@ -62,13 +62,41 @@
   }
 </style>
 <script>
+  function setCookie(cname, value) {
+    document.cookie = cname + '=' + value + '; Path=/;';
+  }
+
+  function deleteCookie(cname) {
+    document.cookie = cname + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  }
+
+  function getCookie(cname) {
+    let name = cname + "=";
+    let ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+
   const body = document.querySelector("body");
 
-  let isLightMode = true;
+  let isLightMode = getCookie("mode");
+  if (isLightMode == "") {
+    setCookie("mode", "light");
+    isLightMode = true;
+  } else if (isLightMode == "light") isLightMode = false;
+  else isLightMode = true;
 
   function changeMode() {
     const changeModeButton = document.getElementById("change-mode");
-    const otherModeName = (isLightMode) ? "dark" : "light";
+    const otherModeName = (!isLightMode) ? "light" : "dark";
     const currentModeName = (isLightMode) ? "light" : "dark";
 
     body.style.setProperty("--text-color", `var(--${otherModeName}-text-color)`);
@@ -79,7 +107,7 @@
     body.style.setProperty("--success-color", `var(--${otherModeName}-success-color)`);
 
     changeModeButton.innerHTML = `${currentModeName} mode`
-
+    setCookie("mode", otherModeName)
     isLightMode = !isLightMode;
   }
 </script>
@@ -95,7 +123,10 @@
   </nav>
   <div>
     <a class="nav__button" id="change-mode" onclick="changeMode()">Dark Mode</a>
-    <a class="nav__button" onclick="document.cookie='jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC;'; location.reload()">Logout</a>
+    <a class="nav__button" onclick="deleteCookie('jwt'); location.reload()">Logout</a>
   </div>
 </header>
+<script>
+  changeMode();
+</script>
 <div class="space"></div>
