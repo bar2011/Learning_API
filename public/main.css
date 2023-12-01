@@ -12,11 +12,11 @@ body {
 	--light-accent-color: #3b3b54;
 	--light-sucess-color: #1ab26b;
 
-	--dark-text-color: #c6d9f6;
-	--dark-background-color: #254555;
-	--dark-primary-color: #000f1a;
-	--dark-secondary-color: #d0d6d8;
-	--dark-accent-color: #ababc4;
+	--dark-text-color: #d0d9e9;
+	--dark-background-color: #33383b;
+	--dark-primary-color: #0f1f2b;
+	--dark-secondary-color: #29c5eb;
+	--dark-accent-color: #cbcbdf;
 	--dark-sucess-color: #a1ff8a;
 
 	--text-color: var(--light-text-color);
