@@ -41,7 +41,7 @@
 #editing {
     color: transparent;
     background: transparent;
-    caret-color: black; /* Or choose your favourite color */
+    caret-color: var(--secondary-color); /* Or choose your favourite color */
 }
 
 /* Can be scrolled */
