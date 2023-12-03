@@ -60,3 +60,18 @@ code {
     background-color: var(--primary-color);
     color: var(--text-color);
 }
+
+#convert {
+    position: absolute;
+    top: calc(700px + 15vh + 20px);
+    width: 94%;
+    text-align: center;
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
+    border: 10px solid var(--secondary-color);
+    border-radius: 8px;
+}
+
+#convert:hover {
+    cursor: pointer;
+}
