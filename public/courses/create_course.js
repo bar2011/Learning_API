@@ -74,9 +74,19 @@ function convertTextToHTML() {
 			"error"
 		);
 
-	// Increment index by 2 so the program would be able to detect whitespace after course image 
-	courseData = courseData[0].substring(0, courseData[0].match(/\s}cd/).index+2);
-	courseData = [...courseData.matchAll(stringRegexp)];
+	// Increment index by 2 so the program would be able to detect whitespace after course image
+	courseData = courseData[0].substring(
+		0,
+		courseData[0].match(/\s}cd/).index + 2
+	);
+	courseData = getArgsFromSection(courseData, 3);
+
+	if (courseData === undefined)
+		return swal(
+			"You didn't enter the course data section correctly",
+			"You can use it like so:\ncd{ 'course name', 'course description{optional}', 'course image url' }cd",
+			"error"
+		);
 
 	title = courseData[0][0];
 	if (!textRegexp.test(title) || title.length < 3 || title.length > 30)
@@ -118,6 +128,11 @@ function convertTextToHTML() {
 			lastChapter = i + 2;
 		}
 	}
+
+	console.table(chaptersText)
+
+	if (chaptersText.length <= 0)
+		return swal("You need to enter at least one chapter", "", "error");
 
 	let chapterObjects = [];
 
@@ -171,9 +186,18 @@ function createChapter(chapterText, chapterNumber) {
 	// Increment index by 2 so it would be able to detect whitespace after chapter image
 	chapterData = chapterData[0].substring(
 		0,
-		chapterData[0].match(/\s}d/).index+2
+		chapterData[0].match(/\s}d/).index + 2
 	);
-	chapterData = [...chapterData.matchAll(stringRegexp)];
+	chapterData = getArgsFromSection(chapterData, 2);
+
+	if (chapterData === undefined) {
+		swal(
+			`You didn't enter chapter data correctly on chapter ${chapterNumber}`,
+			"You can use it like so:\nd{ 'chapter name', 'chapter image url' }d",
+			"error"
+		);
+		return null;
+	}
 
 	chapterObject.title = chapterData[0][0];
 	if (
@@ -331,11 +355,20 @@ function getQuestionDiv(sectionText, chapterNumber, questionNumber) {
 	let answerText = sectionText
 		.substring(sectionText.indexOf("{c}"))
 		.match(stringRegexp);
-	let options = [
-		...sectionText
-			.substring(sectionText.indexOf("o{ "), sectionText.indexOf(" }o"))
-			.matchAll(stringRegexp),
-	];
+	let options = sectionText.substring(
+		sectionText.indexOf("o{ "),
+		sectionText.indexOf(" }o")
+	);
+	options = getArgsFromSection(options);
+	if (options === undefined) {
+		swal(
+			`You need to enter answer options for question number ${questionNumber} in chapter ${chapterNumber}`,
+			"",
+			"error"
+		);
+		return null;
+	}
+
 	if (questionText == null || answerText == null || options == null)
 		return null;
 	options = options.map((option) => {
@@ -427,6 +460,16 @@ function shuffle(array) {
 
 	return array;
 }
+
+function getArgsFromSection(sectionText, expectedArgNum = undefined) {
+	let arguments = [...sectionText.matchAll(stringRegexp)];
+	if (arguments === undefined || arguments.length <= 0) return undefined;
+	if (expectedArgNum !== undefined && arguments.length !== expectedArgNum)
+		return undefined;
+
+	return arguments;
+}
+
 /*
 cd{ "Course name", "Course Description", "https://courseimage.png" }cd
 p{
