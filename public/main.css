@@ -81,7 +81,7 @@ button {
 #progress-div {
 	width: 100%;
 	display: grid;
-	grid-template-columns: 25% 25% 25% 25%;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 	margin-bottom: 5%;
 }
 
@@ -110,6 +110,7 @@ button {
 .chapter {
 	margin-right: 5%;
 	margin-left: 5%;
+	margin-bottom: 5%;
 	padding: 10%;
 	border: var(--primary-color) 10px solid;
 	border-radius: 15px;
