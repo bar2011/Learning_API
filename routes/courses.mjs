@@ -6,7 +6,7 @@ import fs from "fs";
 import mysql2 from "mysql2";
 import http from "http";
 import axios from "axios";
-import { getUserDataFromJWT } from "../jwt.mjs";
+import { Jwt } from "../jwt.mjs";
 
 export const router = express.Router();
 
@@ -226,7 +226,7 @@ router
 		if ((await getRequest(`/courses/${req.params.id}`)).statusCode == 404)
 			return res.sendStatus(404);
 
-		const email = getUserDataFromJWT(req.cookies.jwt).payload.sub;
+		const email = Jwt.getUserDataFromJWT(req.cookies.jwt).payload.sub;
 		await runSqlCode(
 			"UPDATE user_progress SET current_chapter = ?, current_section = ? WHERE user_email = ? AND course_id = ?",
 			[
