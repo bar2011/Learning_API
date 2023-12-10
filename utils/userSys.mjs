@@ -1,4 +1,4 @@
-import { runSqlCode } from "./routes/courses.mjs";
+import { runSqlCode } from "../routes/courses.mjs";
 import { Jwt } from "./jwt.mjs";
 import { config } from "dotenv";
 config();

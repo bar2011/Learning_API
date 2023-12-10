@@ -2,8 +2,8 @@ import express from "express";
 import cookieParser from "cookie-parser";
 const app = express();
 import { router as coursesRouter } from "./routes/courses.mjs";
-import { UserSystem } from "./userSys.mjs";
-import { RenderPage } from "./renderPage.mjs";
+import { UserSystem } from "./utils/userSys.mjs";
+import { RenderPage } from "./utils/renderPage.mjs";
 
 // 200: OK 201: Created 204: No Content
 // 400: Bad req 401: Unauthorized 403: Forbidden 404: Not Found 409: Conflict

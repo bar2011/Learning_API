@@ -11,7 +11,7 @@
 </head>
 
 <body style="margin-left: 3%;">
-  <%- include('header.ejs') %>
+  <%- include('./partials/header.ejs') %>
   <div id="progress-div">
     <% for( let chapter = 0; chapter < chapters.length; chapter++ ) { %>
     <div class="chapter" <% let onclick = "" %> <% if (chapter <= currentChapter) { %>

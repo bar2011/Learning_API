@@ -1,5 +1,5 @@
 import { Jwt } from "./jwt.mjs";
-import { runSqlCode, getImageFromLink } from "./routes/courses.mjs";
+import { runSqlCode, getImageFromLink } from "../routes/courses.mjs";
 
 export class RenderPage {
 	static async getMainPageData() {

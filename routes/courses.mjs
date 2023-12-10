@@ -6,7 +6,7 @@ import fs from "fs";
 import mysql2 from "mysql2";
 import http from "http";
 import axios from "axios";
-import { Jwt } from "../jwt.mjs";
+import { Jwt } from "../utils/jwt.mjs";
 
 export const router = express.Router();
 
