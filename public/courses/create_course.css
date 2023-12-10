@@ -5,7 +5,7 @@
     margin-left: 3%; margin-right: 3%;
     border: 0;
     width: 94%;
-    height: 700px;
+    height: 70vh;
 
     outline: none;
     background-color: var(--primary-color);
@@ -62,9 +62,7 @@ code {
 }
 
 #convert {
-    position: absolute;
-    top: calc(700px + 15vh + 20px);
-    width: 94%;
+    width: 97%;
     text-align: center;
     color: var(--primary-color);
     background-color: var(--secondary-color);

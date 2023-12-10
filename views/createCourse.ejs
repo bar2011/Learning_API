@@ -18,7 +18,7 @@
 <body style="margin-left: 3%;">
     <%- include('header.ejs', {createCourse: true}) %>
     
-    <div style="height: 630px;">
+    <div style="height: 76vh;">
         <textarea placeholder="Enter Course Creation Text" id="editing" spellcheck="false"
             oninput="update(this.value); sync_scroll(this);" onscroll="sync_scroll(this);"
             onkeydown="check_tab(this, event);"></textarea>
