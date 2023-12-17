@@ -21,6 +21,8 @@ async function connectToMySql() {
 		password: process.env.PASSWORD,
 		database: "sql_database",
 	});
+
+	console.log("Connected to MySQL database");
 }
 
 // Run MySQL code using a promise rather then a nested callback
