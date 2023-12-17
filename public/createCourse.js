@@ -1,6 +1,11 @@
 const textRegexp = new RegExp(/^[^"]+$/);
-const stringRegexp = new RegExp(/(?<=[,\s]")([^"])*(?="[,\s])/g);
-const stringKeywordRegexp = new RegExp(/"([^"])*"/g);
+const stringRegexp = new RegExp(/(?<=[,\s]')([^'])*(?='[,\s])/g);
+const stringKeywordRegexp = new RegExp(/'([^'])*'/g);
+const sectionKeywordRegexp = new RegExp(
+	/([qtopd]|cd){\s|\s}([qtopd]|cd)|\s{c}\s/g
+);
+const courseDataEndRegexp = new RegExp(/\s}cd/);
+const matchSectionsInChapter = new RegExp(/([tq]){\s[\s\S]*?\s}\1/g);
 
 let inputDiv;
 let inputtedText = "";
@@ -10,7 +15,7 @@ let description;
 
 Prism.languages["course"] = {
 	string: stringKeywordRegexp,
-	keyword: /([qtopd]|cd){\s|\s}([qtopd]|cd)|\s{c}\s/,
+	keyword: sectionKeywordRegexp,
 	property: /,\s/,
 };
 
@@ -65,71 +70,19 @@ function convertTextToHTML() {
 		},
 	});
 
-	// when showing error link to something that looks like documentation but less good
 	let courseData = inputtedText.match(/cd{\s.+/);
-	if (courseData == null || courseData.length <= 0)
-		return swal(
-			"You need to enter course data",
-			"You can use it like so:\ncd{ 'course name', 'course description{optional}', 'course image url' }cd",
-			"error"
-		);
-
-	// Increment index by 2 so the program would be able to detect whitespace after course image
-	courseData = courseData[0].substring(
-		0,
-		courseData[0].match(/\s}cd/).index + 2
-	);
-	courseData = getArgsFromSection(courseData, 3);
-
-	if (courseData === undefined)
-		return swal(
-			"You didn't enter the course data section correctly",
-			"You can use it like so:\ncd{ 'course name', 'course description{optional}', 'course image url' }cd",
-			"error"
-		);
-
-	title = courseData[0][0];
-	if (!textRegexp.test(title) || title.length < 3 || title.length > 30)
-		return swal(
-			"The title you entered is INVALID",
-			'Your title needs to be between 3 and 30 characters.\nIt also cannot contain the character "',
-			"error"
-		);
-
-	description = courseData[1][0];
-	if (
-		(!textRegexp.test(description) ||
-			description.length < 15 ||
-			description.length > 250) &&
-		description.length > 0
-	)
-		return swal(
-			"The description you entered is INVALID",
-			'Your description needs to be between 15 and 250 characters.\nIt also cannot contain the character "',
-			"error"
-		);
-
-	let imageUrl = courseData[2][0];
-	imageUrl = checkImage(imageUrl);
-	if (!imageUrl)
-		return swal(
-			"The course image URL you entered was INVALID",
-			"",
-			"error"
-		);
+	if (!checkCourseData(courseData)) return;
 
 	// Add every chapters text to `chapters` array
 	let chaptersText = [];
-	let lastChapter = inputtedText.match(/\s}cd/).index + 3;
+	let previousChapter = inputtedText.match(courseDataEndRegexp).index + 3;
 	for (let i = 0; i < inputtedText.length; i++) {
-		// Find the end of a chapter and use `lastChapter` variable to get start of the chapter
+		// Find the end of a chapter and use `previousChapter` to get the start of the chapter
 		if (inputtedText.substring(i, i + 2) == "}p") {
-			chaptersText.push(inputtedText.substring(lastChapter, i + 1));
-			lastChapter = i + 2;
+			chaptersText.push(inputtedText.substring(previousChapter, i + 1));
+			previousChapter = i + 2;
 		}
 	}
-
-	console.table(chaptersText)
 
 	if (chaptersText.length <= 0)
 		return swal("You need to enter at least one chapter", "", "error");
@@ -143,6 +96,118 @@ function convertTextToHTML() {
 	}
 
 	sendCourseToServer(chapterObjects, imageUrl);
+}
+
+function checkCourseData(courseData) {
+	if (courseData == null || courseData.length <= 0) {
+		swal(
+			"You need to enter course data",
+			"You can use it like so:\ncd{ 'course name', 'course description{optional}', 'course image url' }cd",
+			"error"
+		);
+		return false;
+	}
+
+	// Increment index by 2 so the program would be able to detect whitespace after course image
+	courseData = courseData[0].substring(
+		0,
+		courseData[0].match(courseDataEndRegexp).index + 2
+	);
+	courseData = getArgsFromSection(courseData, 3);
+
+	if (courseData === undefined) {
+		swal(
+			"You didn't enter the course data section correctly",
+			"You can use it like so:\ncd{ 'course name', 'course description{optional}', 'course image url' }cd",
+			"error"
+		);
+		return false;
+	}
+
+	title = courseData[0][0];
+	if (!textRegexp.test(title) || !inRange(title.length, 3, 30)) {
+		swal(
+			"The title you entered is INVALID",
+			'Your title needs to be between 3 and 30 characters.\nIt also cannot contain the character "',
+			"error"
+		);
+		return false;
+	}
+
+	description = courseData[1][0];
+	if (
+		!textRegexp.test(description) ||
+		!inRange(description.length, 15, 250)
+	) {
+		swal(
+			"The description you entered is INVALID",
+			'Your description needs to be between 15 and 250 characters.\nIt also cannot contain the character "',
+			"error"
+		);
+		return false;
+	}
+
+	let imageUrl = courseData[2][0];
+	imageUrl = checkImage(imageUrl);
+	if (!imageUrl) {
+		swal("The course image URL you entered was INVALID", "", "error");
+		return false;
+	}
+
+	return true;
+}
+
+function checkChapterData(chapterData) {
+	if (chapterData == null) {
+		swal(
+			`You need to enter chapter data for chapter ${chapterNumber}`,
+			"You can use it like so:\nd{ 'chapter name', 'chapter image url' }d",
+			"error"
+		);
+		return false;
+	}
+	// Increment index by 2 so it would be able to detect whitespace after chapter image
+	chapterData = chapterData[0].substring(
+		0,
+		chapterData[0].match(/\s}d/).index + 2
+	);
+	chapterData = getArgsFromSection(chapterData, 2);
+
+	if (chapterData === undefined) {
+		swal(
+			`You didn't enter chapter data correctly on chapter ${chapterNumber}`,
+			"You can use it like so:\nd{ 'chapter name', 'chapter image url' }d",
+			"error"
+		);
+		return false;
+	}
+
+	chapterObject.title = chapterData[0][0];
+	if (
+		!textRegexp.test(chapterObject.title) ||
+		chapterObject.title.length < 3 ||
+		chapterObject.title.length > 30
+	) {
+		swal(
+			`The title you entered for chapter ${chapterNumber} is INVALID`,
+			'Your title needs to be between 3 and 30 characters.\nIt also cannot contain the character "',
+			"error"
+		);
+		return false;
+	}
+
+	chapterObject.image = chapterData[1][0];
+	chapterObject.image = checkImage(chapterObject.image);
+	if (!chapterObject.image) {
+		swal(
+			`The image URL you entered in chapter ${chapterNumber} was INVALID`,
+			"",
+			"error"
+		);
+		return false;
+	}
+
+	return true;
 }
 
 function checkImage(imageUrl) {
@@ -174,62 +239,14 @@ function createChapter(chapterText, chapterNumber) {
 	};
 
 	let chapterData = chapterText.match(/d{\s.+/);
-
-	if (chapterData == null) {
-		swal(
-			`You need to enter chapter data for chapter ${chapterNumber}`,
-			"You can use it like so:\nd{ 'chapter name', 'chapter image url' }d",
-			"error"
-		);
-		return null;
-	}
-	// Increment index by 2 so it would be able to detect whitespace after chapter image
-	chapterData = chapterData[0].substring(
-		0,
-		chapterData[0].match(/\s}d/).index + 2
-	);
-	chapterData = getArgsFromSection(chapterData, 2);
-
-	if (chapterData === undefined) {
-		swal(
-			`You didn't enter chapter data correctly on chapter ${chapterNumber}`,
-			"You can use it like so:\nd{ 'chapter name', 'chapter image url' }d",
-			"error"
-		);
-		return null;
-	}
-
-	chapterObject.title = chapterData[0][0];
-	if (
-		!textRegexp.test(chapterObject.title) ||
-		chapterObject.title.length < 3 ||
-		chapterObject.title.length > 30
-	) {
-		swal(
-			`The title you entered for chapter ${chapterNumber} is INVALID`,
-			'Your title needs to be between 3 and 30 characters.\nIt also cannot contain the character "',
-			"error"
-		);
-		return null;
-	}
-
-	chapterObject.image = chapterData[1][0];
-	chapterObject.image = checkImage(chapterObject.image);
-	if (!chapterObject.image) {
-		swal(
-			`The image URL you entered in chapter ${chapterNumber} was INVALID`,
-			"",
-			"error"
-		);
-		return null;
-	}
+	if (!checkChapterData(chapterData)) return null;
 
 	chapterObject.html = document.createElement("div");
 
 	let questionNumber = 1;
 
-	// Get all the sections from text using prefex
-	let sectionsText = [...chapterText.matchAll(/([tq]){\s[\s\S]*?\s}\1/g)];
+	// Get all the sections from text using prefix
+	let sectionsText = [...chapterText.matchAll(matchSectionsInChapter)];
 
 	if (sectionsText.length <= 0) {
 		swal(
@@ -256,7 +273,7 @@ function createChapter(chapterText, chapterNumber) {
 	chapterFinishingSection.className = "section " + ++sectionsText.length;
 	chapterFinishingSection.appendChild(
 		$.parseHTML(
-			`<button onclick="course.finishLevel(${chapterNumber})" class="finish continue button small-button hover-anim">Finish</button>`
+			`<button onclick="course.finishLevel(${chapterNumber})" class="finish continue small-button hover-anim">Finish</button>`
 		)[0]
 	);
 	chapterObject.html.appendChild(chapterFinishingSection);
@@ -320,7 +337,6 @@ function sendCourseToServer(chapterObjects, imageUrl) {
 	});
 }
 
-// `mainDiv` is the text or question div
 function finishCreationOfChapterSection(mainElement, sectionNumber) {
 	let chapterSection = document.createElement("div");
 	chapterSection.className = "section " + sectionNumber++;
@@ -468,4 +484,8 @@ function getArgsFromSection(sectionText, expectedArgNum = undefined) {
 		return undefined;
 
 	return arguments;
+}
+
+function inRange(num, low, high) {
+	return low < num && num < high;
 }
