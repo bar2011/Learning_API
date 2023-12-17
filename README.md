@@ -101,7 +101,7 @@ I expect a lot of bugs in the software, as this is a project I've been working o
 
 You can start the application using `npm run start`. <br>
 The command will do the following things:
-1. Start the website and server on URL specified on .env and on port 3000 (for example, if the URL was localhost, the website will open on https://localhost:3000)
+1. Start the website and server on URL specified on .env and on port 3000 (for example, if the URL was localhost, the website will open on http://localhost:3000)
 2. Try to connect to the MySQL database created on localhost
 ***
 After you start the website and connect to it, you need to sign up.
