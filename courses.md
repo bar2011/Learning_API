@@ -5,7 +5,7 @@ The "course creation text" is built with two major sections:
 ## 1. The course data
 here is an example course data:
 ```
-cd{ "The basics of Math", "Teaches the basic fundamentals of mathematics", "https://i.pinimg.com/originals/ba/4b/e8/ba4be89a541b2f2fc4131c4e77df01d9.png" }cd
+cd{ 'The Basics of Math', 'Teaches the fundamentals of mathematics', 'https://i.pinimg.com/originals/ba/4b/e8/ba4be89a541b2f2fc4131c4e77df01d9.png' }cd
 ```
 
 You can see that it's divided into three parts by commas, and surrounded by ```cd{  }cd``` brackets.
@@ -49,7 +49,7 @@ You <b>need</b> to have a chapter data section at the start of every chapter.
 ### The Text Section
 This section just contains text for the user to see.
 
-A text section is created as following: ```t{ "[your text]" }t```
+A text section is created as following: ```t{ '[your text]' }t```
 
 ### The Question Section
 I think this one is the most complicated section.
@@ -61,7 +61,7 @@ This section is surrounded with ```q{  }q```, and it takes three arguments:
 
 A full question section would look like:
 ```
-q{ "[your question]" {c} "[the correct answer]" o{ "[option1]", "[option2]", "[option3]" ... }o }q
+q{ '[your question]' {c} '[the correct answer]' o{ '[option1]', '[option2]', '[option3]' ... }o }q
 ```
 <br><br>
 You can combine the text and question sections to create a full chapter, and combine chapters to create a full course.

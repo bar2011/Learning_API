@@ -122,6 +122,6 @@ app.post("/signup", async (req, res) => {
 
 app.use("/courses", coursesRouter);
 
-app.listen(3000, process.env.PORT, () => {
-	console.log(`Started server at http://${process.env.PORT}:3000`);
+app.listen(3000, process.env.URL, () => {
+	console.log(`Started server at http://${process.env.URL}:3000`);
 });

@@ -469,23 +469,3 @@ function getArgsFromSection(sectionText, expectedArgNum = undefined) {
 
 	return arguments;
 }
-
-/*
-cd{ "Course name", "Course Description", "https://courseimage.png" }cd
-p{
-    d{ "Name Of Chapter", "https://chapterimage.png" }d
-    t{ "This is some text that I put here" }t
-    q{ "This is a qquesiotn" {c} "Hello"
-        o{ "cat",
-           "dog",
-           "house as",
-           "notebook jf",
-           "bot tle",
-           "monitor",
-           "flag",
-           "U בSA" }o
-    }q
-}p
-*/
-
-// https://ds055uzetaobb.cloudfront.net/brioche/chapter/Introduction_to_Algebra-BDG7jd.png

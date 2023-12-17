@@ -12,7 +12,6 @@
   "license": "ISC",
   "dependencies": {
     "@imgly/background-removal-node": "^1.1.5",
-    "@vercel/postgres": "^0.5.1",
     "axios": "^1.6.2",
     "bcrypt": "^5.1.0",
     "cookie-parser": "^1.4.6",
