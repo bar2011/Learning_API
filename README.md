@@ -80,13 +80,17 @@ I expect a lot of bugs in the software, as this is a project I've been working o
    ```sh
    npm install
    ```
-3. Enter your URL, JWT SECRET, MySQL USER and PASSWORD in `.env`
+3. Create a MySQL connection on localhost and run the `./database/create-database.sql` file.
+4. Create a user with permissions to SELECT, INSERT, UPDATE and DELETE.
+   Save the username and password.
+5. Enter your URL, JWT SECRET, MySQL USER and PASSWORD in `.env`
    ```sh
     URL="WEBSITE URL (you can leave this as 0.0.0.0 to start on localhost)"
     USER="YOUR MYSQL USERNAME"
     PASSWORD="YOUR MYSQL USER PASSWORD"
     JWT_SECRET="YOUR JSON WEB TOKEN SECRET TEXT"
    ```
+   Optimally the JWT_SECRET needs to be a lot of random characters.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

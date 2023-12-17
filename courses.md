@@ -8,19 +8,15 @@ here is an example course data:
 cd{ 'The Basics of Math', 'Teaches the fundamentals of mathematics', 'https://i.pinimg.com/originals/ba/4b/e8/ba4be89a541b2f2fc4131c4e77df01d9.png' }cd
 ```
 
-You can see that it's divided into three parts by commas, and surrounded by ```cd{  }cd``` brackets.
+You can see that it's divided into three parts (arguments) by commas, and surrounded by ```cd{  }cd``` brackets.
 
 * The first part is the course's title, which needs to apply to the following arguments:
   * A course's title needs to be between 3 and 30 characters long.
-  * The special characters allowed are: \\", \\', \\{, \\}, (, ) and ?
-  
-  If the title wouldn't meet these arguments, the course will not be created.
+  * All characters except `'` are allowed.
 <br><br>
 * The second part of the course data is the course's description, which needs to apply to the following arguments:
   * A course's description needs to be between 15 and 250 characters long.
-  * The special characters allowed are: \\", \\', \\{, \\}, (, ), ?, \\,
-  
-  If the description wouldn't meet these arguments, the course will not be created.
+  * All characters except `'` are allowed.
 <br>
   The description can be empty.
 <br><br>
@@ -31,20 +27,18 @@ You can see that it's divided into three parts by commas, and surrounded by ```c
   The URL must end with the file type of the image.
 
 ## 2. The chapters
-The second section is the chapters of the course.
-This isn't really a section, but a bunch of chapters one after another.
+The second (and most important) part in the course creation text is the chapters of the course.
+This part can be only one section, but usually it's a bunch of chapter section one after another.
 
-Each chapter is surrounded with ```p{  }p``` (p for part), and inside the parentheses you need to have one chapter data section and after that you can have text and questions, as much as you want.
+Each chapter is surrounded with ```p{  }p``` (p for part), and inside the parentheses you need to have one chapter data section, and then a bunch of text/question sections to create the actual chapter.
 
 ### The Chapter Data
-This section is very similar to the course data but with one difference.
-
-That is that there is no description for chapters.
-Other than that, it's the same as course data.
+The only difference this section has from the course data is that there is no description for chapters.
+Other than that, they're the absolute same.
 
 A chapter data section is surrounded with ```d{  }d``` (d for data).
 
-You <b>need</b> to have a chapter data section at the start of every chapter.
+You **need** to have a chapter data section at the start of every chapter.
 
 ### The Text Section
 This section just contains text for the user to see.
@@ -57,7 +51,7 @@ I think this one is the most complicated section.
 This section is surrounded with ```q{  }q```, and it takes three arguments:
 1. The question itself e.g. "What is 2 + 2?"
 2. The correct answer. Before typing the correct answer you need to put {c} (c for correct).
-3. The options. You can put any amount that you want. 3 will be chosen randomly every time someone opens the chapter. You need to put the options inside a ```o{  }o```, separated by a comma.
+3. The options. You can put any amount that you want (although it's recommended to put at least 3 options not including the correct answer). 3 of the options will be chosen randomly every time someone opens the chapter. You need to put the options inside a ```o{  }o```, separated by a comma.
 
 A full question section would look like:
 ```
