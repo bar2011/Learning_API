@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS `sql_learning_api`;
-CREATE DATABASE `sql_learning_api`;
-USE `sql_learning_api`;
+DROP DATABASE IF EXISTS `sql_database`;
+CREATE DATABASE `sql_database`;
+USE `sql_database`;
 
 CREATE TABLE `courses` (
 	`course_id` INT NOT NULL AUTO_INCREMENT,

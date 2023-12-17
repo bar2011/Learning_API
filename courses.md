@@ -1,5 +1,5 @@
 # Create your own courses
-Learning API supports users creating courses on their own with plain text.
+Mathology supports users creating courses on their own with plain text.
 <br>
 The "course creation text" is built with two major sections:
 ## 1. The course data

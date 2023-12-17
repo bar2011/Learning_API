@@ -19,7 +19,7 @@ async function connectToMySql() {
 		host: "localhost",
 		user: process.env.USER,
 		password: process.env.PASSWORD,
-		database: "sql_learning_api",
+		database: "sql_database",
 	});
 }
 

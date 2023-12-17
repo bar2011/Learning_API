@@ -1,7 +1,7 @@
 <a name="readme-top"></a>
 
 <br />
-<h1 align="center">Learning API</h1>
+<h1 align="center">Mathology</h1>
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -31,7 +31,7 @@
 
 ## About The Project
 
-Learning API is an open source website, that works similar to the learning website [brilliant](https://brilliant.org). <br>
+Mathology is an open source website, that works similar to [brilliant](https://brilliant.org). <br>
 You can use it to:
 * learn a new subject using a course somebody already created
 * create your own courses about interesting subjects and show them to other people
@@ -74,7 +74,7 @@ I expect a lot of bugs in the software, as this is a project I've been working o
 <!-- Add instructions to create the database -->
 1. Clone the repo
    ```sh
-   git clone https://github.com/bar2011/Learning_API
+   git clone https://github.com/bar2011/Mathology
    ```
 2. Install NPM packages
    ```sh
@@ -154,7 +154,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 Bar Einav - bareinav46@gmail.com
 
-Project Link: [https://github.com/bar2011/Learning_API](https://github.com/bar2011/Learning_API)
+Project Link: [https://github.com/bar2011/Mathology](https://github.com/bar2011/Mathology)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
